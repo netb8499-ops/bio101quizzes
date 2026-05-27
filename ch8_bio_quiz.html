@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio 101 &ndash; Chapter 8 Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f11;
+    --surface: #1a1a1f;
+    --surface2: #232328;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0efea;
+    --muted: #888780;
+    --accent: #5DCAA5;
+    --accent-dim: rgba(93,202,165,0.12);
+    --danger: #E24B4A;
+    --danger-dim: rgba(226,75,74,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .header .tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text);
+  }
+
+  .header p {
+    color: var(--muted);
+    margin-top: 0.5rem;
+    font-size: 14px;
+  }
+
+  .progress-bar-wrap {
+    background: var(--surface);
+    border-radius: 999px;
+    height: 4px;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .question-num {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    margin-bottom: 0.75rem;
+  }
+
+  .question-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.45;
+    margin-bottom: 1.75rem;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    background: var(--surface2);
+    user-select: none;
+  }
+
+  .option:hover:not(.disabled) {
+    background: rgba(93,202,165,0.06);
+    border-color: rgba(93,202,165,0.3);
+  }
+
+  .option.correct {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .option.wrong {
+    border-color: var(--danger);
+    background: var(--danger-dim);
+  }
+
+  .option.disabled { cursor: default; }
+
+  .option-letter {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'Syne', sans-serif;
+    color: var(--muted);
+    transition: all 0.15s;
+    margin-top: 1px;
+  }
+
+  .option.correct .option-letter {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0f1f18;
+  }
+
+  .option.wrong .option-letter {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+  }
+
+  .option-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .feedback {
+    margin-top: 1.25rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    line-height: 1.55;
+    display: none;
+  }
+
+  .feedback.correct {
+    background: var(--accent-dim);
+    border: 0.5px solid rgba(93,202,165,0.25);
+    color: #9FE1CB;
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: var(--danger-dim);
+    border: 0.5px solid rgba(226,75,74,0.25);
+    color: #F7C1C1;
+    display: block;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    justify-content: flex-end;
+  }
+
+  button {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0.6rem 1.4rem;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0a1a12;
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .results {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .results-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .results-label {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+
+  .results-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .breakdown-card {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+  }
+
+  .breakdown-card .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .breakdown-card .lbl {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .breakdown-card.good .num { color: var(--accent); }
+  .breakdown-card.bad .num { color: var(--danger); }
+
+  .result-message {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <span class="tag">Bio 101</span>
+    <h1>Chapter 8<br>Cellular Respiration</h1>
+    <p id="intro-sub">Test your knowledge &mdash; questions are shuffled each round</p>
+  </div>
+
+  <div id="quiz-area">
+    <div class="progress-label">
+      <span id="q-counter">Question 1 of 20</span>
+      <span id="score-live">Score: 0</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+    </div>
+    <div id="question-container"></div>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="restartQuiz()">Restart</button>
+      <button class="btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-panel">
+    <div class="results-score" id="final-score"></div>
+    <div class="results-label">out of <span id="total-q"></span> questions</div>
+    <div class="results-breakdown">
+      <div class="breakdown-card good">
+        <div class="num" id="correct-count"></div>
+        <div class="lbl">Correct</div>
+      </div>
+      <div class="breakdown-card bad">
+        <div class="num" id="wrong-count"></div>
+        <div class="lbl">Incorrect</div>
+      </div>
+    </div>
+    <div class="result-message" id="result-message"></div>
+    <button class="btn-primary" onclick="restartQuiz()">Shuffle &amp; Restart</button>
+  </div>
+</div>
+
+<script>
+const allQuestions = [
+  {
+    q: "What is the ultimate goal of cellular respiration?",
+    options: ["To produce glucose from sunlight", "To produce ATP as usable energy for the cell", "To release CO2 into the atmosphere", "To break down oxygen molecules"],
+    answer: 1,
+    explanation: "The entire point of cellular respiration is to produce ATP — the energy currency cells use to power everything they do."
+  },
+  {
+    q: "The general reaction for aerobic respiration (C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + Energy) is:",
+    options: ["Endergonic — it requires energy input", "Exergonic — it releases energy", "Neither — no net energy change", "Endergonic when glucose is present"],
+    answer: 1,
+    explanation: "Exergonic reactions release energy. Breaking glucose down releases stored energy, so energy exits — exergonic. Remember: Exergonic = energy Exits."
+  },
+  {
+    q: "Which of the following correctly lists the four stages of aerobic respiration in order?",
+    options: [
+      "Glycolysis → Krebs Cycle → Acetyl-CoA Formation → ETC",
+      "Krebs Cycle → Glycolysis → ETC → Chemiosmosis",
+      "Glycolysis → Acetyl-CoA Formation → Krebs Cycle → ETC/Chemiosmosis",
+      "ETC → Chemiosmosis → Glycolysis → Krebs Cycle"
+    ],
+    answer: 2,
+    explanation: "The correct order is: Glycolysis (cytoplasm) → Acetyl-CoA Formation (pyruvate oxidation) → Krebs Cycle → ETC + Chemiosmosis (both in mitochondria)."
+  },
+  {
+    q: "Where does glycolysis take place?",
+    options: ["Mitochondrial matrix", "Inner mitochondrial membrane", "Cytoplasm (cytosol)", "Nucleus"],
+    answer: 2,
+    explanation: "Glycolysis happens in the cytoplasm — it doesn't need the mitochondria at all, which is why even cells without mitochondria can run glycolysis."
+  },
+  {
+    q: "What does one glucose molecule (6 carbons) get converted into during glycolysis?",
+    options: ["2 molecules of Acetyl-CoA", "6 molecules of CO2", "2 molecules of pyruvate", "1 molecule of ATP"],
+    answer: 2,
+    explanation: "Glycolysis splits the 6-carbon glucose in half, producing 2 molecules of pyruvate (3 carbons each)."
+  },
+  {
+    q: "In addition to pyruvate, what else is produced during glycolysis?",
+    options: ["4 ATP and 4 FADH2", "2 ATP (net) and 2 NADH", "2 ATP and 2 CO2", "6 NADH and 2 FADH2"],
+    answer: 1,
+    explanation: "Glycolysis produces a net of 2 ATP (4 made, 2 spent to start) and 2 NADH electron carriers."
+  },
+  {
+    q: "When oxygen is present, where does pyruvate go and what happens to it?",
+    options: [
+      "It stays in the cytoplasm and becomes lactic acid",
+      "It moves to the inner mitochondrial membrane and becomes FADH2",
+      "It moves to the mitochondrial matrix and gets converted into Acetyl-CoA",
+      "It gets exported out of the cell"
+    ],
+    answer: 2,
+    explanation: "With oxygen present, pyruvate enters the mitochondrial matrix. There it's converted into Acetyl-CoA — one carbon is lost as CO2, and an NADH is made."
+  },
+  {
+    q: "What electron carrier molecules capture electrons during the Krebs Cycle?",
+    options: ["ATP and ADP", "NADH and FADH2", "NAD+ and FAD", "CO2 and H2O"],
+    answer: 1,
+    explanation: "NADH and FADH2 are the electron carriers — they pick up electrons during the Krebs Cycle and deliver them to the Electron Transport Chain."
+  },
+  {
+    q: "After the Krebs Cycle is complete, where are all the carbons that were originally in glucose?",
+    options: ["Stored in ATP molecules", "Released as CO2", "Converted into water (H2O)", "Stored in NADH"],
+    answer: 1,
+    explanation: "Every single carbon from the original glucose has been fully oxidized and released as CO2. That CO2 is what you breathe out."
+  },
+  {
+    q: "Where are electrons carried by NADH delivered to?",
+    options: ["The Krebs Cycle", "ATP Synthase directly", "The Electron Transport Chain (ETC)", "The cytoplasm"],
+    answer: 2,
+    explanation: "NADH drops off its electrons at the Electron Transport Chain, which is embedded in the inner mitochondrial membrane."
+  },
+  {
+    q: "What is the role of oxygen in the Electron Transport Chain?",
+    options: [
+      "It pumps H+ ions across the membrane",
+      "It is the starting material for making glucose",
+      "It is the final electron acceptor, combining with electrons and H+ to form water",
+      "It directly produces ATP"
+    ],
+    answer: 2,
+    explanation: "Oxygen is the final electron acceptor at Complex IV of the ETC. It grabs the electrons and combines with H+ to form water (H2O). Without O2, the whole chain stops."
+  },
+  {
+    q: "What is ATP synthase and what drives it?",
+    options: [
+      "A ribosome that builds ATP using RNA",
+      "A protein turbine powered by H+ ions flowing down their concentration gradient back into the matrix",
+      "A protein that splits glucose using ATP",
+      "An enzyme that uses CO2 to make energy"
+    ],
+    answer: 1,
+    explanation: "ATP synthase is like a molecular turbine. H+ ions build up in the intermembrane space, then flow back through ATP synthase into the matrix — that flow physically spins the protein, generating ATP. This is chemiosmosis."
+  },
+  {
+    q: "What is the theoretical maximum ATP yield from one glucose molecule during aerobic respiration?",
+    options: ["2 ATP", "10 ATP", "38 ATP", "100 ATP"],
+    answer: 2,
+    explanation: "The theoretical max is 38 ATP, but in reality cells only get about 30-32 ATP due to inefficiencies."
+  },
+  {
+    q: "Do all living organisms require oxygen to survive?",
+    options: [
+      "Yes, all life requires oxygen",
+      "No — obligate anaerobes can't use oxygen, facultative anaerobes can survive with or without it",
+      "Only animals require oxygen",
+      "Only plants don't require oxygen"
+    ],
+    answer: 1,
+    explanation: "Obligate anaerobes are actually killed by oxygen. Facultative anaerobes can go either way. Only obligate aerobes (like us) must have it."
+  },
+  {
+    q: "What is fermentation, and why does it happen?",
+    options: [
+      "A way to make more ATP using the Krebs Cycle when oxygen is absent",
+      "A process that runs when oxygen IS present to make extra NADH",
+      "A backup process that regenerates NAD+ so glycolysis can keep running when there is no oxygen",
+      "The process of breaking down fats into fatty acids"
+    ],
+    answer: 2,
+    explanation: "Without oxygen the ETC shuts down, so NADH can't dump its electrons there. Fermentation recycles NADH back to NAD+ so glycolysis can keep churning out its 2 ATP."
+  },
+  {
+    q: "How many ATP are produced during fermentation?",
+    options: ["38 ATP", "16 ATP", "4 ATP", "2 ATP"],
+    answer: 3,
+    explanation: "Only 2 ATP — just what glycolysis makes. The ETC (where most ATP comes from) can't run without oxygen, so fermentation is a really inefficient fallback."
+  },
+  {
+    q: "Which of the following is true about fermentation compared to aerobic respiration?",
+    options: [
+      "Fermentation fully breaks down glucose; aerobic respiration does not",
+      "Both require oxygen",
+      "Aerobic respiration fully breaks down glucose and requires oxygen; fermentation does not fully break it down and requires no oxygen",
+      "Fermentation produces more ATP than aerobic respiration"
+    ],
+    answer: 2,
+    explanation: "Aerobic respiration: yes oxygen, glucose fully catabolized, ~30-38 ATP. Fermentation: no oxygen, glucose only partially broken down (only glycolysis runs), 2 ATP."
+  },
+  {
+    q: "How do fats get used to produce ATP?",
+    options: [
+      "Fats are converted directly into glucose, then run through glycolysis only",
+      "Fatty acids are converted into Acetyl-CoA and enter the Krebs Cycle",
+      "Fats are broken down in the cytoplasm and skip the mitochondria",
+      "Fats are broken down into pyruvate in the nucleus"
+    ],
+    answer: 1,
+    explanation: "Fats are broken into glycerol and fatty acids. The fatty acids get converted into Acetyl-CoA, which then enters the Krebs Cycle. Fats actually yield more ATP than glucose because they have more C-H bonds."
+  },
+  {
+    q: "How are photosynthesis and cellular respiration related?",
+    options: [
+      "They are identical processes that happen in different organelles",
+      "They are opposites — photosynthesis builds glucose using light energy; cellular respiration breaks it down to release energy",
+      "Both processes release CO2 and consume O2",
+      "Cellular respiration only happens in plants that also photosynthesize"
+    ],
+    answer: 1,
+    explanation: "They're essentially mirror images. Photosynthesis: CO2 + H2O + light → glucose + O2. Respiration: glucose + O2 → CO2 + H2O + ATP. The outputs of one are the inputs of the other."
+  },
+  {
+    q: "During the ETC, what does the energy released from passing electrons through the protein complexes do?",
+    options: [
+      "It directly makes ATP without any intermediate steps",
+      "It pumps H+ ions from the matrix into the intermembrane space, creating a concentration gradient",
+      "It breaks down pyruvate into Acetyl-CoA",
+      "It reduces NADH back into NAD+"
+    ],
+    answer: 1,
+    explanation: "As electrons pass through Complexes I, III, and IV, the released energy is used to actively pump H+ ions across the inner membrane into the intermembrane space. That gradient then drives ATP synthase."
+  }
+];
+
+let questions = [];
+let current = 0;
+let score = 0;
+let answered = false;
+
+function shuffle(arr) {
+  let a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function restartQuiz() {
+  questions = shuffle(allQuestions);
+  current = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('results-panel').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  document.getElementById('next-btn').textContent = 'Next';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[current];
+  const total = questions.length;
+
+  document.getElementById('q-counter').textContent = `Question ${current + 1} of ${total}`;
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+  document.getElementById('progress-bar').style.width = `${(current / total) * 100}%`;
+  document.getElementById('next-btn').disabled = true;
+
+  if (current === total - 1) {
+    document.getElementById('next-btn').textContent = 'See Results';
+  } else {
+    document.getElementById('next-btn').textContent = 'Next';
+  }
+
+  const shuffledOptions = shuffle(q.options.map((text, i) => ({ text, originalIndex: i })));
+  const letters = ['A', 'B', 'C', 'D'];
+  const optionsHTML = shuffledOptions.map((opt, i) => `
+    <div class="option" data-original="${opt.originalIndex}" onclick="selectOption(this, ${q.answer})">
+      <div class="option-letter">${letters[i]}</div>
+      <div class="option-text">${opt.text}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('question-container').innerHTML = `
+    <div class="question-card">
+      <div class="question-num">Question ${current + 1}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options">${optionsHTML}</div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  `;
+}
+
+function selectOption(el, correctOriginalIndex) {
+  if (answered) return;
+  answered = true;
+
+  const allOptions = document.querySelectorAll('.option');
+  const selectedOriginal = parseInt(el.getAttribute('data-original'));
+  const isCorrect = selectedOriginal === correctOriginalIndex;
+
+  allOptions.forEach(opt => {
+    opt.classList.add('disabled');
+    const orig = parseInt(opt.getAttribute('data-original'));
+    if (orig === correctOriginalIndex) opt.classList.add('correct');
+  });
+
+  if (!isCorrect) {
+    el.classList.add('wrong');
+    el.classList.remove('correct');
+  }
+
+  if (isCorrect) score++;
+
+  const feedback = document.getElementById('feedback');
+  const q = questions[current];
+  feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+  feedback.textContent = (isCorrect ? '✓ Correct — ' : '✗ Not quite — ') + q.explanation;
+
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+  document.getElementById('next-btn').disabled = false;
+}
+
+function nextQuestion() {
+  if (!answered) return;
+  current++;
+  if (current >= questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz-area').style.display = 'none';
+  const panel = document.getElementById('results-panel');
+  panel.style.display = 'block';
+
+  const total = questions.length;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('final-score').textContent = `${pct}%`;
+  document.getElementById('total-q').textContent = total;
+  document.getElementById('correct-count').textContent = score;
+  document.getElementById('wrong-count').textContent = total - score;
+
+  let msg = '';
+  if (pct === 100) msg = "Perfect score. You know this chapter cold.";
+  else if (pct >= 80) msg = "Solid. Review the ones you missed and you're ready.";
+  else if (pct >= 60) msg = "Getting there — a few gaps to patch before the exam.";
+  else msg = "Worth another pass through the material before you quiz again.";
+
+  document.getElementById('result-message').textContent = msg;
+  document.getElementById('progress-bar').style.width = '100%';
+}
+
+restartQuiz();
+</script>
+</body>
+</html>
