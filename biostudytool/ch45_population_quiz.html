@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio 101 &ndash; Chapter 45 Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f11;
+    --surface: #1a1a1f;
+    --surface2: #232328;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0efea;
+    --muted: #888780;
+    --accent: #5DCAA5;
+    --accent-dim: rgba(93,202,165,0.12);
+    --danger: #E24B4A;
+    --danger-dim: rgba(226,75,74,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .header .tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text);
+  }
+
+  .header p {
+    color: var(--muted);
+    margin-top: 0.5rem;
+    font-size: 14px;
+  }
+
+  .progress-bar-wrap {
+    background: var(--surface);
+    border-radius: 999px;
+    height: 4px;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .question-num {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    margin-bottom: 0.75rem;
+  }
+
+  .question-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.45;
+    margin-bottom: 1.75rem;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    background: var(--surface2);
+    user-select: none;
+  }
+
+  .option:hover:not(.disabled) {
+    background: rgba(93,202,165,0.06);
+    border-color: rgba(93,202,165,0.3);
+  }
+
+  .option.correct {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .option.wrong {
+    border-color: var(--danger);
+    background: var(--danger-dim);
+  }
+
+  .option.disabled { cursor: default; }
+
+  .option-letter {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'Syne', sans-serif;
+    color: var(--muted);
+    transition: all 0.15s;
+    margin-top: 1px;
+  }
+
+  .option.correct .option-letter {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0f1f18;
+  }
+
+  .option.wrong .option-letter {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+  }
+
+  .option-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .feedback {
+    margin-top: 1.25rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    line-height: 1.55;
+    display: none;
+  }
+
+  .feedback.correct {
+    background: var(--accent-dim);
+    border: 0.5px solid rgba(93,202,165,0.25);
+    color: #9FE1CB;
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: var(--danger-dim);
+    border: 0.5px solid rgba(226,75,74,0.25);
+    color: #F7C1C1;
+    display: block;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    justify-content: flex-end;
+  }
+
+  button {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0.6rem 1.4rem;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0a1a12;
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .results {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .results-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .results-label {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+
+  .results-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .breakdown-card {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+  }
+
+  .breakdown-card .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .breakdown-card .lbl {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .breakdown-card.good .num { color: var(--accent); }
+  .breakdown-card.bad .num { color: var(--danger); }
+
+  .result-message {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <span class="tag">Bio 101</span>
+    <h1>Chapter 45<br>Population Ecology</h1>
+    <p id="intro-sub">Test your knowledge &mdash; questions are shuffled each round</p>
+  </div>
+
+  <div id="quiz-area">
+    <div class="progress-label">
+      <span id="q-counter">Question 1 of 30</span>
+      <span id="score-live">Score: 0</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+    </div>
+    <div id="question-container"></div>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="restartQuiz()">Restart</button>
+      <button class="btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-panel">
+    <div class="results-score" id="final-score"></div>
+    <div class="results-label">out of <span id="total-q"></span> questions</div>
+    <div class="results-breakdown">
+      <div class="breakdown-card good">
+        <div class="num" id="correct-count"></div>
+        <div class="lbl">Correct</div>
+      </div>
+      <div class="breakdown-card bad">
+        <div class="num" id="wrong-count"></div>
+        <div class="lbl">Incorrect</div>
+      </div>
+    </div>
+    <div class="result-message" id="result-message"></div>
+    <button class="btn-primary" onclick="restartQuiz()">Shuffle &amp; Restart</button>
+  </div>
+</div>
+
+<script>
+const allQuestions = [
+  {
+    q: "What is Population Ecology?",
+    options: [
+      "The study of how and why populations of a single species change over time, including size, density, and distribution",
+      "The study of all species in a given area and how they interact with each other",
+      "The study of how the physical environment affects living organisms",
+      "The study of how organisms from different species compete for the same resources"
+    ],
+    answer: 0,
+    explanation: "Population ecology focuses on ONE species and tracks how its numbers, density, and spread change over time."
+  },
+  {
+    q: "What is an Ecosystem?",
+    options: [
+      "All the living organisms in an area, with no physical environment included",
+      "Every place on Earth where life exists, including land, water, and lower atmosphere",
+      "All living organisms in an area PLUS their physical environment (soil, water, air, sunlight) and their interactions",
+      "Only the nonliving components of an environment like water, soil, and sunlight"
+    ],
+    answer: 2,
+    explanation: "An ecosystem = living things (biotic) + physical environment (abiotic). Both parts are required."
+  },
+  {
+    q: "What is a Community in ecology?",
+    options: [
+      "All organisms in an area plus the soil, water, and climate they live in",
+      "All the different species living in the same area and interacting with each other, without the physical environment",
+      "A single species and all the individuals that belong to it",
+      "The global sum of all ecosystems on Earth"
+    ],
+    answer: 1,
+    explanation: "A community is just the organisms — multiple species interacting. The physical environment is NOT included."
+  },
+  {
+    q: "What is the Biosphere?",
+    options: [
+      "The layer of atmosphere that protects Earth from UV radiation",
+      "All organisms living in a specific ecosystem",
+      "Every place on Earth where life exists — land, water, and lower atmosphere — essentially all ecosystems combined",
+      "The relationship between organisms and their nonliving environment"
+    ],
+    answer: 2,
+    explanation: "Biosphere = all of life on Earth. It's the biggest level — the sum of every ecosystem everywhere."
+  },
+  {
+    q: "What is the key difference between population SIZE and population DENSITY?",
+    options: [
+      "Size refers to how spread out individuals are; density refers to the total count",
+      "Size is the total number of individuals; density is how many individuals are packed into a given area",
+      "Size measures growth rate; density measures death rate",
+      "They are the same concept measured in different units"
+    ],
+    answer: 1,
+    explanation: "Size = HOW MANY total. Density = HOW CROWDED they are per unit area. 500 deer in 10 sq miles = density of 50/sq mile."
+  },
+  {
+    q: "Why does population DENSITY matter more than size for things like disease and competition?",
+    options: [
+      "Because larger populations always have more disease",
+      "Because density tells you how crowded individuals are — crowded populations spread disease faster and compete more intensely",
+      "Because density determines how fast a population can reproduce",
+      "Because density is easier to measure than population size"
+    ],
+    answer: 1,
+    explanation: "Density captures crowding. Disease spreads faster when individuals are packed tightly together, regardless of total size."
+  },
+  {
+    q: "Which distribution pattern is MOST common in nature, and why does it occur?",
+    options: [
+      "Uniform, because competition causes individuals to space themselves evenly",
+      "Random, because resources are evenly distributed in most environments",
+      "Clumped, because resources tend to be patchy and many animals benefit from being in groups",
+      "Linear, because most animals follow rivers and migration paths"
+    ],
+    answer: 2,
+    explanation: "Clumped is most common. Resources are rarely spread evenly, so organisms cluster where food, water, or shelter exists."
+  },
+  {
+    q: "Wolves in packs and fish in schools are examples of which distribution pattern?",
+    options: ["Uniform", "Random", "Clumped", "Dispersed"],
+    answer: 2,
+    explanation: "Both wolves and fish cluster in groups — classic clumped distribution driven by social benefit and patchy resources."
+  },
+  {
+    q: "Penguins defending nesting spots and creosote bushes that chemically repel other plants are examples of which distribution pattern?",
+    options: ["Clumped", "Uniform", "Random", "Migratory"],
+    answer: 1,
+    explanation: "Uniform distribution results from competition and territorial behavior — each individual pushes others away, creating even spacing."
+  },
+  {
+    q: "Which distribution pattern occurs when resources are evenly distributed and individuals have no reason to clump or avoid each other?",
+    options: ["Clumped", "Uniform", "Random", "Scattered"],
+    answer: 2,
+    explanation: "Random distribution means no pattern at all — dandelions in a field, some rainforest trees. Rare in nature."
+  },
+  {
+    q: "What are the four factors that determine population size change?",
+    options: [
+      "Predation, disease, competition, and climate",
+      "Births, deaths, immigration, and emigration",
+      "Food availability, water availability, shelter, and mates",
+      "Growth rate, death rate, migration rate, and extinction rate"
+    ],
+    answer: 1,
+    explanation: "The equation: Population change = (Births + Immigration) - (Deaths + Emigration). These four forces drive all population changes."
+  },
+  {
+    q: "Which of the following INCREASES population size?",
+    options: [
+      "Emigration and deaths",
+      "Emigration and births",
+      "Births and immigration",
+      "Deaths and immigration"
+    ],
+    answer: 2,
+    explanation: "Births add new individuals born within the population. Immigration adds individuals moving IN from elsewhere. Both increase size."
+  },
+  {
+    q: "What does a survivorship curve show?",
+    options: [
+      "How fast a population grows over time",
+      "The proportion of individuals in a population that survive to each age, showing WHEN they are most likely to die",
+      "How population density changes with environmental conditions",
+      "The relationship between birth rate and death rate over a lifespan"
+    ],
+    answer: 1,
+    explanation: "Survivorship curves are graphs tracking what fraction of a population is still alive at each age — they reveal the pattern of when death hits hardest."
+  },
+  {
+    q: "A Type I survivorship curve applies to which organisms, and what is its key characteristic?",
+    options: [
+      "Fish and insects — most die young, survivors live long",
+      "Birds and squirrels — individuals die at a constant rate throughout life",
+      "Humans and elephants — most individuals survive to old age, death concentrated at the end",
+      "Oak trees and oysters — massive numbers of offspring, very few survive"
+    ],
+    answer: 2,
+    explanation: "Type I = late loss. Most individuals make it to old age. Typical of large mammals with few offspring and heavy parental care."
+  },
+  {
+    q: "Which type of survivorship curve describes a species where most individuals die young, but survivors live long lives?",
+    options: ["Type I", "Type II", "Type III", "Type IV"],
+    answer: 2,
+    explanation: "Type III = early loss. Think fish, oysters, oak trees — millions of offspring, almost none survive to adulthood. If you DO make it, you're good."
+  },
+  {
+    q: "Which survivorship type shows a CONSTANT death rate throughout life — no age is particularly safer than another?",
+    options: ["Type I", "Type II", "Type III", "Type IV"],
+    answer: 1,
+    explanation: "Type II = constant loss. Birds, squirrels, and some lizards fit this pattern — equal probability of dying at any age."
+  },
+  {
+    q: "What is exponential growth and what shape does it produce on a graph?",
+    options: [
+      "Growth that slows as resources become scarce; produces an S-shaped curve",
+      "Growth at a constant rate where the more individuals there are, the faster the population grows; produces a J-shaped curve",
+      "Growth that fluctuates randomly around carrying capacity; produces a wave-shaped curve",
+      "Growth that stays constant over time; produces a flat horizontal line"
+    ],
+    answer: 1,
+    explanation: "Exponential growth = J-curve. The growth rate stays constant, but because the population is bigger each year, the raw number added keeps increasing — it accelerates."
+  },
+  {
+    q: "Under what conditions does exponential growth occur?",
+    options: [
+      "When predator populations are high and controlling prey numbers",
+      "When a population approaches its carrying capacity",
+      "With unlimited resources, no predators or disease, and ideal environmental conditions",
+      "When density-dependent factors are actively regulating the population"
+    ],
+    answer: 2,
+    explanation: "Exponential growth requires no real-world limits. It's basically a theoretical ideal that rarely exists long-term in nature."
+  },
+  {
+    q: "What is carrying capacity (K)?",
+    options: [
+      "The minimum population size needed to avoid extinction",
+      "The maximum population size an environment can sustainably support given available resources",
+      "The rate at which a population grows when resources are unlimited",
+      "The number of different species an ecosystem can support"
+    ],
+    answer: 1,
+    explanation: "K = the ceiling. When a population hits carrying capacity, the environment can't support more individuals and growth levels off or stops."
+  },
+  {
+    q: "Why do we say growth is limited by essential resources?",
+    options: [
+      "Because organisms can only use one resource at a time",
+      "Because when ANY one essential resource runs out, growth stops — even if all other resources are plentiful",
+      "Because essential resources are always equally distributed in all environments",
+      "Because only predators and disease truly limit population growth"
+    ],
+    answer: 1,
+    explanation: "The one in shortest supply becomes the limiting factor. You can have unlimited water but if food runs out, growth stops. That's the key insight."
+  },
+  {
+    q: "Which of the following is NOT typically listed as an essential resource that limits population growth?",
+    options: ["Food", "Water", "Gravity", "Space/shelter"],
+    answer: 2,
+    explanation: "Gravity is a constant, not a resource organisms compete for. Food, water, space, light, nutrients, and mates are the classic limiting resources."
+  },
+  {
+    q: "What is logistic population growth and what shape does it produce?",
+    options: [
+      "Unlimited growth with constant acceleration; J-shaped curve",
+      "Growth that slows as the population approaches carrying capacity; S-shaped curve",
+      "Cyclical growth that goes up and down seasonally; wave-shaped curve",
+      "Growth that immediately levels off at a fixed number; flat line"
+    ],
+    answer: 1,
+    explanation: "Logistic growth = S-curve. Starts fast (almost exponential), slows as resources get scarce, levels off at K. This is more realistic than exponential."
+  },
+  {
+    q: "Compare exponential and logistic growth: which statement is CORRECT?",
+    options: [
+      "Both curves are S-shaped, but logistic grows faster",
+      "Exponential growth considers carrying capacity; logistic growth does not",
+      "Exponential = J-curve with unlimited resources assumed; logistic = S-curve that slows and levels off at K",
+      "Logistic growth only applies to human populations; exponential applies to all other species"
+    ],
+    answer: 2,
+    explanation: "Exponential ignores limits (J-curve, keeps accelerating). Logistic acknowledges resource limits and carrying capacity (S-curve, levels off at K)."
+  },
+  {
+    q: "What is the difference between intraspecific and interspecific competition?",
+    options: [
+      "Intraspecific = between different species; interspecific = within the same species",
+      "Intraspecific = within the same species; interspecific = between different species",
+      "Intraspecific = competition for mates only; interspecific = competition for food only",
+      "There is no meaningful difference — both describe the same ecological process"
+    ],
+    answer: 1,
+    explanation: "INTRA = within (same species fighting each other). INTER = between (different species competing). Think: INTRAstate = within a state."
+  },
+  {
+    q: "Why is intraspecific competition generally MORE intense than interspecific competition?",
+    options: [
+      "Because same-species individuals are always larger and more aggressive",
+      "Because the same species needs the EXACT same resources, so there is complete overlap in what they need",
+      "Because interspecific competition is regulated by natural selection",
+      "Because different species always divide resources through niche partitioning"
+    ],
+    answer: 1,
+    explanation: "Complete resource overlap means same-species individuals are direct competitors for everything. Different species can sometimes use resources slightly differently, reducing conflict."
+  },
+  {
+    q: "Which of the following is a density-DEPENDENT factor?",
+    options: [
+      "A wildfire that kills 80% of a deer population regardless of how many deer there were",
+      "A severe drought that wipes out vegetation across a region",
+      "Disease spreading faster through a crowded population than a sparse one",
+      "A volcanic eruption destroying an entire habitat"
+    ],
+    answer: 2,
+    explanation: "Disease spread increases WITH density — crowded populations transmit disease faster. That's the hallmark of a density-dependent factor."
+  },
+  {
+    q: "Which of the following is a density-INDEPENDENT factor?",
+    options: [
+      "Food competition getting worse as the population grows",
+      "A predator focusing on abundant prey species",
+      "A blizzard that kills large numbers of a population regardless of its size",
+      "Overcrowding causing stress and reduced reproduction"
+    ],
+    answer: 2,
+    explanation: "A blizzard doesn't care how big the population is — it kills based on the weather, not density. That's density-independent."
+  },
+  {
+    q: "A population with a WIDE BASE on an age structure diagram suggests what?",
+    options: [
+      "The population is aging and will likely decline",
+      "The population has many older individuals",
+      "The population has lots of young individuals and is likely growing",
+      "The population is stable with equal proportions of all ages"
+    ],
+    answer: 2,
+    explanation: "Wide base = many pre-reproductive individuals = lots of future reproducers = growing population. Classic sign of a rapidly expanding population."
+  },
+  {
+    q: "The three age categories used to analyze population structure are:",
+    options: [
+      "Juvenile, adolescent, and adult",
+      "Pre-reproductive, reproductive, and post-reproductive",
+      "Young, middle-aged, and elderly",
+      "Infant, breeding age, and non-breeding"
+    ],
+    answer: 1,
+    explanation: "Pre-reproductive (too young), reproductive (currently breeding), post-reproductive (past breeding age) — these three determine where a population is headed."
+  },
+  {
+    q: "What was the main reason human population grew slowly for most of history?",
+    options: [
+      "Humans had very low birth rates",
+      "Death rates were extremely high due to disease, famine, and war",
+      "Humans were spread too thin to find mates easily",
+      "Agricultural food supplies were too unreliable to support larger populations"
+    ],
+    answer: 1,
+    explanation: "High death rates — especially from disease — kept population growth slow for thousands of years. It wasn't until death rates dropped that the population exploded."
+  },
+  {
+    q: "Which factor contributed MOST directly to the dramatic drop in human death rates and the subsequent population explosion?",
+    options: [
+      "An increase in human birth rates over the 20th century",
+      "Discovery of new continents providing more living space",
+      "Medical advances including vaccines, antibiotics, and improved sanitation",
+      "A reduction in interspecific competition with other large animals"
+    ],
+    answer: 2,
+    explanation: "Vaccines, antibiotics, and sanitation slashed death rates — especially infant mortality. Births stayed high while deaths plummeted, causing exponential-like growth."
+  },
+  {
+    q: "What does the age structure diagram of a DEVELOPED country typically look like, and what does it indicate?",
+    options: [
+      "Wide base, many young people, rapidly growing population",
+      "Rectangle or top-heavy shape, lots of older people, slow or no population growth",
+      "Very narrow throughout, indicating low birth AND death rates",
+      "Pyramid shape, equal numbers of young and old, stable population"
+    ],
+    answer: 1,
+    explanation: "Developed countries (US, Japan, Europe) have low birth and death rates — their diagrams look boxy or top-heavy, showing an aging population and slow growth."
+  },
+  {
+    q: "What is a major challenge that DEVELOPED countries face regarding their age structure?",
+    options: [
+      "Too many young people competing for limited jobs",
+      "Rapidly increasing birth rates straining infrastructure",
+      "Aging populations with fewer working-age people to support a large elderly population economically",
+      "Lack of medical resources to support growing populations"
+    ],
+    answer: 2,
+    explanation: "Fewer young workers + large elderly population = strain on pension systems, healthcare, and the economy. This is a real crisis in countries like Japan."
+  },
+  {
+    q: "Which of the following is the strongest argument that humans HAVE exceeded Earth's carrying capacity?",
+    options: [
+      "Human population has grown past 8 billion people",
+      "We are depleting renewable resources faster than they can regenerate — overfishing, deforestation, aquifer depletion",
+      "Developing countries continue to have high birth rates",
+      "Technology has changed how we define essential resources"
+    ],
+    answer: 1,
+    explanation: "Drawing down natural capital faster than it regenerates is the clearest sign of exceeding sustainable limits. It's like spending more than you earn — the account eventually runs dry."
+  }
+];
+
+let questions = [];
+let current = 0;
+let score = 0;
+let answered = false;
+
+function shuffle(arr) {
+  let a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function restartQuiz() {
+  questions = shuffle(allQuestions);
+  current = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('results-panel').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  document.getElementById('next-btn').textContent = 'Next';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[current];
+  const total = questions.length;
+
+  document.getElementById('q-counter').textContent = `Question ${current + 1} of ${total}`;
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+  document.getElementById('progress-bar').style.width = `${(current / total) * 100}%`;
+  document.getElementById('next-btn').disabled = true;
+
+  if (current === total - 1) {
+    document.getElementById('next-btn').textContent = 'See Results';
+  } else {
+    document.getElementById('next-btn').textContent = 'Next';
+  }
+
+  const shuffledOptions = shuffle(q.options.map((text, i) => ({ text, originalIndex: i })));
+  const letters = ['A', 'B', 'C', 'D'];
+  const optionsHTML = shuffledOptions.map((opt, i) => `
+    <div class="option" data-original="${opt.originalIndex}" onclick="selectOption(this, ${q.answer})">
+      <div class="option-letter">${letters[i]}</div>
+      <div class="option-text">${opt.text}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('question-container').innerHTML = `
+    <div class="question-card">
+      <div class="question-num">Question ${current + 1}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options">${optionsHTML}</div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  `;
+}
+
+function selectOption(el, correctOriginalIndex) {
+  if (answered) return;
+  answered = true;
+
+  const allOptions = document.querySelectorAll('.option');
+  const selectedOriginal = parseInt(el.getAttribute('data-original'));
+  const isCorrect = selectedOriginal === correctOriginalIndex;
+
+  allOptions.forEach(opt => {
+    opt.classList.add('disabled');
+    const orig = parseInt(opt.getAttribute('data-original'));
+    if (orig === correctOriginalIndex) opt.classList.add('correct');
+  });
+
+  if (!isCorrect) {
+    el.classList.add('wrong');
+    el.classList.remove('correct');
+  }
+
+  if (isCorrect) score++;
+
+  const feedback = document.getElementById('feedback');
+  const q = questions[current];
+  feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+  feedback.textContent = (isCorrect ? '✓ Correct — ' : '✗ Not quite — ') + q.explanation;
+
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+  document.getElementById('next-btn').disabled = false;
+}
+
+function nextQuestion() {
+  if (!answered) return;
+  current++;
+  if (current >= questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz-area').style.display = 'none';
+  const panel = document.getElementById('results-panel');
+  panel.style.display = 'block';
+
+  const total = questions.length;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('final-score').textContent = `${pct}%`;
+  document.getElementById('total-q').textContent = total;
+  document.getElementById('correct-count').textContent = score;
+  document.getElementById('wrong-count').textContent = total - score;
+
+  let msg = '';
+  if (pct === 100) msg = "Perfect score. You know this chapter cold.";
+  else if (pct >= 80) msg = "Solid. Review the ones you missed and you're ready.";
+  else if (pct >= 60) msg = "Getting there — a few gaps to patch before the exam.";
+  else msg = "Worth another pass through the material before you quiz again.";
+
+  document.getElementById('result-message').textContent = msg;
+  document.getElementById('progress-bar').style.width = '100%';
+}
+
+restartQuiz();
+</script>
+</body>
+</html>

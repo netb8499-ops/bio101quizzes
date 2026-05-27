@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio 101 &ndash; Chapter 5 Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f11;
+    --surface: #1a1a1f;
+    --surface2: #232328;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0efea;
+    --muted: #888780;
+    --accent: #5DCAA5;
+    --accent-dim: rgba(93,202,165,0.12);
+    --danger: #E24B4A;
+    --danger-dim: rgba(226,75,74,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .header .tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text);
+  }
+
+  .header p {
+    color: var(--muted);
+    margin-top: 0.5rem;
+    font-size: 14px;
+  }
+
+  .progress-bar-wrap {
+    background: var(--surface);
+    border-radius: 999px;
+    height: 4px;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .question-num {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    margin-bottom: 0.75rem;
+  }
+
+  .question-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.45;
+    margin-bottom: 1.75rem;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    background: var(--surface2);
+    user-select: none;
+  }
+
+  .option:hover:not(.disabled) {
+    background: rgba(93,202,165,0.06);
+    border-color: rgba(93,202,165,0.3);
+  }
+
+  .option.correct {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .option.wrong {
+    border-color: var(--danger);
+    background: var(--danger-dim);
+  }
+
+  .option.disabled { cursor: default; }
+
+  .option-letter {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'Syne', sans-serif;
+    color: var(--muted);
+    transition: all 0.15s;
+    margin-top: 1px;
+  }
+
+  .option.correct .option-letter {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0f1f18;
+  }
+
+  .option.wrong .option-letter {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+  }
+
+  .option-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .feedback {
+    margin-top: 1.25rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    line-height: 1.55;
+    display: none;
+  }
+
+  .feedback.correct {
+    background: var(--accent-dim);
+    border: 0.5px solid rgba(93,202,165,0.25);
+    color: #9FE1CB;
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: var(--danger-dim);
+    border: 0.5px solid rgba(226,75,74,0.25);
+    color: #F7C1C1;
+    display: block;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    justify-content: flex-end;
+  }
+
+  button {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0.6rem 1.4rem;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0a1a12;
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border-color: var(--border);
+  }
+
+  .btn-secondary:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .results {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .results-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .results-label {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+
+  .results-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .breakdown-card {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+  }
+
+  .breakdown-card .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .breakdown-card .lbl {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .breakdown-card.good .num { color: var(--accent); }
+  .breakdown-card.bad .num { color: var(--danger); }
+
+  .result-message {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <span class="tag">Bio 101</span>
+    <h1>Chapter 5<br>Plasma Membranes</h1>
+    <p id="intro-sub">Test your knowledge &mdash; questions are shuffled each round</p>
+  </div>
+
+  <div id="quiz-area">
+    <div class="progress-label">
+      <span id="q-counter">Question 1 of 24</span>
+      <span id="score-live">Score: 0</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+    </div>
+    <div id="question-container"></div>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="restartQuiz()">Restart</button>
+      <button class="btn-primary" id="next-btn" onclick="nextQuestion()" disabled>Next</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-panel">
+    <div class="results-score" id="final-score"></div>
+    <div class="results-label">out of <span id="total-q"></span> questions</div>
+    <div class="results-breakdown">
+      <div class="breakdown-card good">
+        <div class="num" id="correct-count"></div>
+        <div class="lbl">Correct</div>
+      </div>
+      <div class="breakdown-card bad">
+        <div class="num" id="wrong-count"></div>
+        <div class="lbl">Incorrect</div>
+      </div>
+    </div>
+    <div class="result-message" id="result-message"></div>
+    <button class="btn-primary" onclick="restartQuiz()">Shuffle &amp; Restart</button>
+  </div>
+</div>
+
+<script>
+const allQuestions = [
+  {
+    q: "What makes lipids hydrophobic?",
+    options: [
+      "They carry a strong negative charge that repels water",
+      "Their C-H bonds are nonpolar, so they cannot interact with polar water molecules",
+      "They are too large to dissolve in water",
+      "They have a phosphate group that blocks water"
+    ],
+    answer: 1,
+    explanation: "Lipids are made of carbon-hydrogen bonds which are nonpolar -- no uneven electron distribution means no partial charges, so water (which is polar) has nothing to interact with."
+  },
+  {
+    q: "Which of the following correctly defines hydrophilic?",
+    options: [
+      "Scared of water",
+      "Repels water molecules",
+      "Attracted to / likes water",
+      "Cannot dissolve in any liquid"
+    ],
+    answer: 2,
+    explanation: "Hydrophilic means water-loving. These molecules are polar or charged, so they interact well with water."
+  },
+  {
+    q: "What are the four main molecules found in plasma membranes?",
+    options: [
+      "DNA, RNA, proteins, lipids",
+      "Phospholipids, proteins, cholesterol, carbohydrates",
+      "Fatty acids, glucose, enzymes, nucleotides",
+      "Glycolipids, steroids, amino acids, water"
+    ],
+    answer: 1,
+    explanation: "Phospholipids form the bilayer structure, proteins do most of the work, cholesterol controls fluidity, and carbohydrates act as ID tags on the outer surface."
+  },
+  {
+    q: "Which function of the plasma membrane controls what enters and exits the cell?",
+    options: [
+      "Cell recognition",
+      "Physical boundary",
+      "Selective permeability",
+      "Active transport"
+    ],
+    answer: 2,
+    explanation: "Selective permeability means the membrane is picky -- not everything gets through. It selectively allows certain substances in or out."
+  },
+  {
+    q: "The phospholipid head is ________ and the tail is ________.",
+    options: [
+      "Hydrophobic / hydrophilic",
+      "Nonpolar / polar",
+      "Hydrophilic / hydrophobic",
+      "Charged / uncharged"
+    ],
+    answer: 2,
+    explanation: "The head contains a phosphate group -- polar and attracted to water (hydrophilic). The tail is made of fatty acid hydrocarbon chains -- nonpolar and repels water (hydrophobic)."
+  },
+  {
+    q: "Why do phospholipids arrange into a bilayer in the membrane?",
+    options: [
+      "Because the tails are attracted to water and face outward",
+      "Because the heads face inward to avoid water and tails face outward",
+      "Because the heads are hydrophilic and face outward toward water, while the tails hide inward away from water",
+      "Because cholesterol forces them into a double layer"
+    ],
+    answer: 2,
+    explanation: "The polar heads love water so they face out toward the watery environments inside and outside the cell. The nonpolar tails avoid water so they hide in the middle."
+  },
+  {
+    q: "Which membrane protein type acts as an ID tag so cells can recognize each other?",
+    options: [
+      "Transport proteins",
+      "Receptor proteins",
+      "Cell recognition proteins",
+      "Enzymatic proteins"
+    ],
+    answer: 2,
+    explanation: "Cell recognition proteins (glycoproteins) on the outer surface act like identity badges. Your immune system uses these to tell 'self' from 'foreign.'"
+  },
+  {
+    q: "What type of membrane protein receives signals like hormones from outside the cell?",
+    options: [
+      "Receptor proteins",
+      "Transport proteins",
+      "Cell adhesion proteins",
+      "Enzymatic proteins"
+    ],
+    answer: 0,
+    explanation: "Receptor proteins sit on the membrane surface and bind to specific signaling molecules, triggering a response inside the cell."
+  },
+  {
+    q: "Diffusion moves molecules from ________ to ________.",
+    options: [
+      "Low concentration to high concentration",
+      "High concentration to low concentration",
+      "Inside the cell to outside only",
+      "Requires ATP to function"
+    ],
+    answer: 1,
+    explanation: "Diffusion is always passive -- molecules naturally spread out from where there's more of them to where there's less, until evenly distributed."
+  },
+  {
+    q: "Which of these requires energy (ATP) to move substances across the membrane?",
+    options: [
+      "Simple diffusion",
+      "Facilitated diffusion",
+      "Osmosis",
+      "Active transport"
+    ],
+    answer: 3,
+    explanation: "Active transport moves molecules AGAINST the concentration gradient (low to high), which doesn't happen naturally -- so the cell has to spend energy (ATP) to make it happen."
+  },
+  {
+    q: "Which molecules can cross the membrane by simple diffusion without any help?",
+    options: [
+      "Glucose and amino acids",
+      "Large proteins and ions",
+      "Oxygen, carbon dioxide, water, and small nonpolar molecules",
+      "Only water molecules"
+    ],
+    answer: 2,
+    explanation: "Small nonpolar molecules can slip right through the phospholipid bilayer on their own. Larger or polar molecules need protein assistance."
+  },
+  {
+    q: "What is facilitated diffusion?",
+    options: [
+      "Movement against the concentration gradient using ATP",
+      "Passive movement through transport proteins, still high to low concentration",
+      "The cell engulfing large molecules with its membrane",
+      "Water moving through aquaporins only"
+    ],
+    answer: 1,
+    explanation: "Facilitated = with help. The molecule still moves high to low (passive, no energy needed) but uses a transport protein as a channel or carrier to get through."
+  },
+  {
+    q: "What are aquaporins?",
+    options: [
+      "Proteins that pump ions across the membrane using ATP",
+      "Carbohydrates that help cells recognize each other",
+      "Channel proteins specifically dedicated to rapid water transport",
+      "Enzymes that break down lipids in the bilayer"
+    ],
+    answer: 2,
+    explanation: "Aquaporins are dedicated water tunnels in the membrane. Water can cross slowly on its own but aquaporins massively speed up the process."
+  },
+  {
+    q: "In osmosis, water moves from regions of ________ to regions of ________.",
+    options: [
+      "Low solute concentration to high solute concentration",
+      "High solute concentration to low solute concentration",
+      "High water concentration to low solute concentration",
+      "Low water concentration to high water concentration"
+    ],
+    answer: 0,
+    explanation: "More solute = less water. So water moves from where there's more water (low solute) to where there's less water (high solute). Water follows the solute gradient."
+  },
+  {
+    q: "A cell is placed in a hypertonic solution. What happens?",
+    options: [
+      "Water enters the cell and it swells",
+      "Nothing -- the cell stays the same",
+      "Water leaves the cell and it shrinks",
+      "The cell bursts due to turgor pressure"
+    ],
+    answer: 2,
+    explanation: "Hypertonic = more solute OUTSIDE. Water moves out of the cell to where there's more solute, causing the cell to shrink."
+  },
+  {
+    q: "What happens to an animal cell placed in a hypotonic solution?",
+    options: [
+      "It shrinks and potentially dies",
+      "It stays the same size",
+      "It becomes firm due to the cell wall",
+      "It swells and can burst"
+    ],
+    answer: 3,
+    explanation: "Hypotonic = less solute outside, so water rushes INTO the cell. Animal cells have no cell wall to stop the swelling, so they can burst (lyse)."
+  },
+  {
+    q: "Why don't plant cells burst in a hypotonic solution like animal cells do?",
+    options: [
+      "Plant cells don't absorb water",
+      "The cell wall resists the swelling and prevents bursting",
+      "Plant cells have more cholesterol in their membranes",
+      "Plant cells use active transport to push water back out"
+    ],
+    answer: 1,
+    explanation: "The rigid cell wall acts as a physical barrier. Water enters and creates turgor pressure, but the wall holds -- making the cell firm, not burst."
+  },
+  {
+    q: "What term describes when a plant cell shrinks away from its cell wall in a hypertonic solution?",
+    options: [
+      "Turgor pressure",
+      "Osmotic lysis",
+      "Plasmolysis",
+      "Endocytosis"
+    ],
+    answer: 2,
+    explanation: "Plasmolysis -- the cell membrane pulls away from the wall as water leaves. The wall stays intact but the cell inside shrinks."
+  },
+  {
+    q: "Which type of endocytosis is the cell 'eating' -- engulfing large solid particles like bacteria?",
+    options: [
+      "Pinocytosis",
+      "Receptor-mediated endocytosis",
+      "Exocytosis",
+      "Phagocytosis"
+    ],
+    answer: 3,
+    explanation: "Phagocytosis = cell eating. The membrane wraps around a large solid particle and pulls it inside. Your immune cells do this to destroy bacteria."
+  },
+  {
+    q: "What is pinocytosis?",
+    options: [
+      "The cell ejecting waste materials through vesicles",
+      "The cell engulfing liquid and small dissolved molecules",
+      "A specific protein-receptor binding process",
+      "The cell engulfing solid bacteria"
+    ],
+    answer: 1,
+    explanation: "Pinocytosis = cell drinking. The membrane pulls in liquid along with whatever small molecules are dissolved in it."
+  },
+  {
+    q: "In receptor-mediated endocytosis, what makes it different from phagocytosis and pinocytosis?",
+    options: [
+      "It uses ATP while the others don't",
+      "It only works on liquid, not solids",
+      "It is highly selective -- specific molecules bind to receptor proteins before being pulled in",
+      "It moves substances OUT of the cell instead of in"
+    ],
+    answer: 2,
+    explanation: "Receptor-mediated endocytosis is picky. Specific molecules have to bind to matching receptor proteins on the membrane first -- like a lock and key -- before the cell pulls them in."
+  },
+  {
+    q: "What is exocytosis?",
+    options: [
+      "The cell engulfing external particles by wrapping its membrane around them",
+      "The passive movement of small molecules across the membrane",
+      "A vesicle fusing with the membrane to release its contents outside the cell",
+      "Water moving out of the cell in a hypertonic environment"
+    ],
+    answer: 2,
+    explanation: "Exocytosis is the reverse of endocytosis. A vesicle inside the cell fuses with the plasma membrane and dumps its contents to the outside."
+  },
+  {
+    q: "What is the role of cholesterol in the plasma membrane?",
+    options: [
+      "It acts as an ID tag for cell recognition",
+      "It transports large molecules across the membrane",
+      "It controls membrane fluidity and rigidity",
+      "It receives signals from hormones"
+    ],
+    answer: 2,
+    explanation: "Cholesterol is tucked between phospholipids and acts as a fluidity buffer -- keeping the membrane from being too rigid in cold or too fluid in heat."
+  },
+  {
+    q: "Which membrane function involves attaching cells to each other or to surrounding structures?",
+    options: [
+      "Transport proteins",
+      "Cell adhesion proteins",
+      "Receptor proteins",
+      "Enzymatic proteins"
+    ],
+    answer: 1,
+    explanation: "Cell adhesion proteins physically anchor cells together or to extracellular structures. Important for forming tissues."
+  }
+];
+
+let questions = [];
+let current = 0;
+let score = 0;
+let answered = false;
+
+function shuffle(arr) {
+  let a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function restartQuiz() {
+  questions = shuffle(allQuestions);
+  current = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('results-panel').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  document.getElementById('next-btn').textContent = 'Next';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[current];
+  const total = questions.length;
+
+  document.getElementById('q-counter').textContent = `Question ${current + 1} of ${total}`;
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+  document.getElementById('progress-bar').style.width = `${(current / total) * 100}%`;
+  document.getElementById('next-btn').disabled = true;
+
+  if (current === total - 1) {
+    document.getElementById('next-btn').textContent = 'See Results';
+  } else {
+    document.getElementById('next-btn').textContent = 'Next';
+  }
+
+  const shuffledOptions = shuffle(q.options.map((text, i) => ({ text, originalIndex: i })));
+  const letters = ['A', 'B', 'C', 'D'];
+  const optionsHTML = shuffledOptions.map((opt, i) => `
+    <div class="option" data-original="${opt.originalIndex}" onclick="selectOption(this, ${q.answer})">
+      <div class="option-letter">${letters[i]}</div>
+      <div class="option-text">${opt.text}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('question-container').innerHTML = `
+    <div class="question-card">
+      <div class="question-num">Question ${current + 1}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options">${optionsHTML}</div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  `;
+}
+
+function selectOption(el, correctOriginalIndex) {
+  if (answered) return;
+  answered = true;
+
+  const allOptions = document.querySelectorAll('.option');
+  const selectedOriginal = parseInt(el.getAttribute('data-original'));
+  const isCorrect = selectedOriginal === correctOriginalIndex;
+
+  allOptions.forEach(opt => {
+    opt.classList.add('disabled');
+    const orig = parseInt(opt.getAttribute('data-original'));
+    if (orig === correctOriginalIndex) opt.classList.add('correct');
+  });
+
+  if (!isCorrect) {
+    el.classList.add('wrong');
+    el.classList.remove('correct');
+  }
+
+  if (isCorrect) score++;
+
+  const feedback = document.getElementById('feedback');
+  const q = questions[current];
+  feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+  feedback.textContent = (isCorrect ? '✓ Correct — ' : '✗ Not quite — ') + q.explanation;
+
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+  document.getElementById('next-btn').disabled = false;
+}
+
+function nextQuestion() {
+  if (!answered) return;
+  current++;
+  if (current >= questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz-area').style.display = 'none';
+  const panel = document.getElementById('results-panel');
+  panel.style.display = 'block';
+
+  const total = questions.length;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('final-score').textContent = `${pct}%`;
+  document.getElementById('total-q').textContent = total;
+  document.getElementById('correct-count').textContent = score;
+  document.getElementById('wrong-count').textContent = total - score;
+
+  let msg = '';
+  if (pct === 100) msg = "Perfect score. You know this chapter cold.";
+  else if (pct >= 80) msg = "Solid. Review the ones you missed and you're ready.";
+  else if (pct >= 60) msg = "Getting there — a few gaps to patch before the exam.";
+  else msg = "Worth another pass through the material before you quiz again.";
+
+  document.getElementById('result-message').textContent = msg;
+  document.getElementById('progress-bar').style.width = '100%';
+}
+
+restartQuiz();
+</script>
+</body>
+</html>
