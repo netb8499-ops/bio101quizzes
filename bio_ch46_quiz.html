@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio 101 — Chapter 46 Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #2a2a3a;
+    --accent: #00e5a0;
+    --accent2: #ff4d6d;
+    --accent3: #7b61ff;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --correct: #00e5a0;
+    --wrong: #ff4d6d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background-image: radial-gradient(ellipse at 20% 0%, rgba(123,97,255,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, rgba(0,229,160,0.06) 0%, transparent 60%);
+  }
+
+  header { text-align: center; margin-bottom: 48px; }
+
+  header .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--text);
+  }
+
+  header h1 span { color: var(--accent); }
+
+  .progress-bar-wrap {
+    max-width: 680px;
+    margin: 24px auto 0;
+    background: var(--border);
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .score-display {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  .restart-btn {
+    display: inline-block;
+    margin-top: 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .restart-btn:hover {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    background: rgba(255,77,109,0.06);
+  }
+
+  .quiz-wrap { max-width: 680px; margin: 0 auto; }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    transition: border-color 0.3s;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .question-card.answered::before { opacity: 1; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .q-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .options { display: grid; gap: 10px; }
+
+  .option-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1.4;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent3);
+    background: rgba(123,97,255,0.08);
+    transform: translateX(4px);
+  }
+
+  .option-btn .opt-letter {
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 18px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+
+  .option-btn:hover:not(:disabled) .opt-letter { color: var(--accent3); }
+
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(0,229,160,0.08);
+    color: var(--correct);
+  }
+
+  .option-btn.correct .opt-letter { color: var(--correct); }
+
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,77,109,0.08);
+    color: var(--wrong);
+  }
+
+  .option-btn.wrong .opt-letter { color: var(--wrong); }
+  .option-btn:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    display: none;
+  }
+
+  .feedback.correct {
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.3);
+    color: var(--correct);
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.3);
+    color: #ff8fa3;
+    display: block;
+  }
+
+  #results {
+    display: none;
+    text-align: center;
+    padding: 60px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  #results.show { display: block; animation: slideIn 0.4s ease; }
+
+  .result-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -4px;
+    margin: 16px 0;
+  }
+
+  .result-score.great { color: var(--correct); }
+  .result-score.ok { color: #ffd166; }
+  .result-score.bad { color: var(--wrong); }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .result-msg {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: var(--text);
+  }
+
+  .retry-btn {
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 16px 40px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .retry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,229,160,0.25);
+  }
+
+  .missed-list {
+    text-align: left;
+    margin: 32px 0;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+
+  .missed-list h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wrong);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .missed-item {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+  }
+
+  .missed-item span { color: var(--correct); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">BI101 // Chapter 46</div>
+  <h1>Ecosystems &amp; <span>Biomes</span></h1>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="score-display" id="scoreDisplay">0 / 0 answered</div>
+  <button class="restart-btn" onclick="retry()">&#8635; Restart &amp; Shuffle</button>
+</header>
+
+<div class="quiz-wrap" id="quizWrap"></div>
+<div id="results"></div>
+
+<script>
+const questions = [
+  {
+    q: "The two main factors that determine which terrestrial biome exists in a given area are:",
+    opts: [
+      "Elevation and soil type",
+      "Temperature and precipitation",
+      "Sunlight hours and wind speed",
+      "Ocean proximity and altitude"
+    ],
+    ans: 1,
+    explain: "Biomes are defined by climate -- specifically temperature and precipitation. A region that is warm and wet = tropical rainforest. Cold and dry = tundra. Same temperature but different precipitation = different biome."
+  },
+  {
+    q: "What is the rain shadow effect?",
+    opts: [
+      "When cold ocean currents cool coastal air and create deserts near shorelines",
+      "When clouds block sunlight and reduce precipitation on forested slopes",
+      "When moist air rises over a mountain, drops rain on the windward side, and dry air sinks on the leeward side creating a desert",
+      "When warm air rises at the equator and dumps rain on tropical forests"
+    ],
+    ans: 2,
+    explain: "Windward side = moist air rises, cools, drops rain -- lush and green. Leeward side = dried-out air sinks and absorbs moisture -- desert forms. The mountain creates a shadow of dryness."
+  },
+  {
+    q: "Which biome has the highest biodiversity of any land ecosystem on Earth?",
+    opts: [
+      "Temperate deciduous forest",
+      "Tropical rainforest",
+      "Savanna",
+      "Chaparral"
+    ],
+    ans: 1,
+    explain: "Tropical rainforests are always hot and wet -- perfect growing conditions year-round. That constant warmth and moisture supports more species than any other land biome. More species per square kilometer than anywhere else."
+  },
+  {
+    q: "Which biome features permafrost -- permanently frozen soil?",
+    opts: [
+      "Taiga",
+      "Desert",
+      "Tundra",
+      "Temperate grassland"
+    ],
+    ans: 2,
+    explain: "Tundra = freezing, windy, dry, and treeless. Permafrost is the layer of soil that stays permanently frozen. Even in summer only the thin top layer thaws -- trees cannot put down roots deep enough to survive."
+  },
+  {
+    q: "What is an estuary?",
+    opts: [
+      "A very deep ocean trench where no light penetrates",
+      "A freshwater lake with unusually high nutrient content",
+      "Where a river meets the ocean -- fresh and salt water mix to create brackish water",
+      "A shallow coral reef found in warm tropical ocean water"
+    ],
+    ans: 2,
+    explain: "Estuaries = transition zones between fresh and salt water. Brackish water. They are incredibly productive ecosystems -- nursery grounds for many fish species, rich in nutrients from river runoff."
+  },
+  {
+    q: "What is the 10% rule in energy transfer?",
+    opts: [
+      "10% of all species in an ecosystem are endangered",
+      "Only 10% of the energy at one trophic level passes to the next -- the other 90% is lost as heat",
+      "Plants only capture about 10% of the sunlight that hits their leaves",
+      "About 10% of the ocean is the photic zone where photosynthesis can occur"
+    ],
+    ans: 1,
+    explain: "At every step of the food chain, 90% of the energy is used by the organism to live (moving, breathing, staying warm) or lost as heat. Only 10% gets stored in body tissue and passed to the next level."
+  },
+  {
+    q: "If plants in a food chain have 10,000 energy units, how much energy reaches the hawk (tertiary consumer)?",
+    opts: [
+      "1,000 units",
+      "100 units",
+      "10 units",
+      "1 unit"
+    ],
+    ans: 2,
+    explain: "Plants (10,000) → insects (1,000, 10%) → frogs (100, 10%) → hawks (10, 10%). Each level loses 90%. By the time you reach the top predator, barely any of the original energy remains -- that is why food chains rarely exceed 4-5 levels."
+  },
+  {
+    q: "What is net primary production (NPP)?",
+    opts: [
+      "The total amount of solar energy that reaches an ecosystem per year",
+      "The amount of plant growth left over for animals to eat after plants use what they need to survive",
+      "The total biomass of all animals in an ecosystem combined",
+      "The energy lost as heat at each trophic level"
+    ],
+    ans: 1,
+    explain: "NPP = what plants produce minus what they use themselves. It is the food energy actually available to consumers. High NPP = lots of food available = can support more animals and more trophic levels."
+  },
+  {
+    q: "Why do tropical rainforests have much higher NPP than deserts or tundras?",
+    opts: [
+      "Rainforests have more pollinators and a greater variety of plants",
+      "Warm temperatures, abundant water, and strong year-round sunlight all drive maximum plant growth",
+      "Desert plants grow faster per individual than rainforest plants",
+      "Tropical rainforests have richer volcanic soil than all other biomes"
+    ],
+    ans: 1,
+    explain: "Plants grow best with heat, water, and light. Tropical rainforests have all three year-round. Deserts are dry. Tundras are cold. Lack any one factor and plant growth crashes -- low NPP."
+  },
+  {
+    q: "What do nitrogen-fixing bacteria do in the nitrogen cycle?",
+    opts: [
+      "Break down dead organisms and return nitrogen compounds to the soil",
+      "Convert excess soil nitrogen back into N2 gas and release it into the atmosphere",
+      "Take unusable N2 gas from the atmosphere and convert it into ammonia that plants can absorb",
+      "Absorb nitrogen from plants and store it in the soil for future use"
+    ],
+    ans: 2,
+    explain: "Nitrogen gas (N2) makes up 78% of the atmosphere but plants CANNOT use it directly. Nitrogen-fixing bacteria convert it into ammonia -- a form plants can actually absorb. Without them, most of Earth would be a nutrient desert."
+  },
+  {
+    q: "What is the role of denitrifying bacteria in the nitrogen cycle?",
+    opts: [
+      "Convert atmospheric N2 gas into usable ammonia for plants",
+      "Break down proteins from dead animals into simpler nitrogen compounds",
+      "Take excess nitrogen compounds from the soil and convert them back into N2 gas, releasing it into the atmosphere",
+      "Fix nitrogen directly from the air into plant root tissue"
+    ],
+    ans: 2,
+    explain: "Denitrifying bacteria do the opposite of nitrogen-fixers. They take nitrogen compounds from the soil and release N2 gas back into the atmosphere. They complete the cycle -- nitrogen in, nitrogen out."
+  },
+  {
+    q: "What is the FIRST thing that happens when large amounts of fertilizer run off into a lake or river?",
+    opts: [
+      "Fish immediately die from direct chemical toxicity",
+      "The water becomes too salty for aquatic life to survive",
+      "A massive algal bloom forms because nitrogen and phosphorus act as super-food for algae",
+      "Oxygen levels spike and cause rapid acidification of the water"
+    ],
+    ans: 2,
+    explain: "Step 1 = algal bloom. The sudden nutrient overload acts like fertilizer for algae -- they explode in population, covering the water surface. Everything after that (blocked sunlight, oxygen crash, dead zone) flows from the bloom."
+  },
+  {
+    q: "How do algal blooms ultimately create oxygen-depleted dead zones?",
+    opts: [
+      "Algae release toxins that directly bind and remove dissolved oxygen from water",
+      "Algae block sunlight killing underwater plants, then bacteria decompose the dead algae consuming all the dissolved oxygen",
+      "Algae absorb all available nitrogen, starving underwater plants until the ecosystem collapses",
+      "Algae raise water temperature to the point where oxygen cannot stay dissolved"
+    ],
+    ans: 1,
+    explain: "Algae bloom → block sunlight → underwater plants die → algae eventually die → bacteria decompose dead algae → bacteria use up ALL dissolved oxygen → fish suffocate and die. Four steps from fertilizer to dead zone."
+  },
+  {
+    q: "Are dead zones growing or shrinking worldwide?",
+    opts: [
+      "Shrinking -- global conservation efforts have dramatically reduced their size",
+      "Staying about the same size for the past few decades",
+      "Growing -- driven by increased fertilizer use and rising global temperatures that reduce water oxygen levels",
+      "Only significant in the Gulf of Mexico -- not a global problem"
+    ],
+    ans: 2,
+    explain: "Dead zones are growing in both number and size. Two main drivers: more industrial fertilizer use worldwide (more nutrient runoff) and rising temperatures (warm water holds less dissolved oxygen). Both trends are worsening."
+  },
+  {
+    q: "How does deforestation disrupt the carbon cycle?",
+    opts: [
+      "Trees release extra oxygen that traps carbon dioxide in the upper atmosphere",
+      "Removing trees eliminates carbon absorption AND releases stored carbon when trees are burned or rot",
+      "Deforestation increases rainfall that washes carbon deep into the ocean permanently",
+      "Trees pump carbon into the soil, so removing them causes all soil carbon to evaporate"
+    ],
+    ans: 1,
+    explain: "Double hit: you lose the carbon-absorbers (trees take in CO2 through photosynthesis) AND you release the stored carbon (burned or rotting trees dump all their stored carbon back into the atmosphere at once)."
+  },
+  {
+    q: "Which of these is NOT a greenhouse gas?",
+    opts: [
+      "Carbon dioxide (CO2)",
+      "Methane (CH4)",
+      "Nitrogen gas (N2)",
+      "Nitrous oxide (N2O)"
+    ],
+    ans: 2,
+    explain: "N2 (regular nitrogen gas) is NOT a greenhouse gas -- it makes up 78% of the atmosphere and does not trap heat. The greenhouse gases are CO2, CH4 (methane), N2O (nitrous oxide), and fluorinated gases."
+  },
+  {
+    q: "What is the main source of methane (CH4) emissions?",
+    opts: [
+      "Burning coal and oil for electricity generation",
+      "Vehicle exhaust from gasoline and diesel engines",
+      "Livestock farming (cow digestion and manure) and landfills",
+      "Deforestation and burning of tropical forests"
+    ],
+    ans: 2,
+    explain: "Methane comes mainly from livestock (cows produce CH4 during digestion), landfills (organic waste decomposing without oxygen), and leaks from oil and gas operations. Beef production has a surprisingly large climate footprint."
+  },
+  {
+    q: "What is biomagnification?",
+    opts: [
+      "Using a microscope to study organisms too small to see with the naked eye",
+      "The process by which toxins become MORE concentrated in body tissue as you move UP the food chain",
+      "The increase in biomass at each higher trophic level in a healthy ecosystem",
+      "The amplification of population sizes in ecosystems with low predator pressure"
+    ],
+    ans: 1,
+    explain: "Biomagnification = toxins amplify up the food chain. A fish eats thousands of contaminated plankton -- the toxins accumulate. A seal eats hundreds of those fish. A killer whale eats dozens of seals. Top predators end up with the most toxin."
+  },
+  {
+    q: "What is the photic zone in aquatic ecosystems?",
+    opts: [
+      "The deepest part of the ocean where no sunlight reaches at all",
+      "The zone near hydrothermal vents where chemosynthesis occurs",
+      "The layer of water shallow enough for sufficient light to penetrate and support photosynthesis",
+      "The high-nutrient zone near river deltas and coastlines"
+    ],
+    ans: 2,
+    explain: "Photic zone = the lit zone. Sunlight can only penetrate so deep into water. Below that is the aphotic zone -- too dark for photosynthesis. Life in the deep ocean depends on food sinking down from the photic zone above."
+  },
+  {
+    q: "Which biome is dominated by evergreen coniferous trees and has very cold, long winters?",
+    opts: [
+      "Temperate deciduous forest",
+      "Tundra",
+      "Temperate grassland",
+      "Taiga (boreal forest)"
+    ],
+    ans: 3,
+    explain: "Taiga = boreal forest. Dominated by spruce, fir, and pine (all evergreen conifers). Cold, long winters and short cool summers. It is the largest land biome on Earth by area -- wraps across Canada, Russia, and Scandinavia."
+  },
+  {
+    q: "Which biome is best described as shrubland with rainy winters, hot and dry summers, and a high wildfire risk?",
+    opts: [
+      "Tropical rainforest",
+      "Chaparral",
+      "Temperate grassland",
+      "Savanna"
+    ],
+    ans: 1,
+    explain: "Chaparral = Mediterranean-type climate. Rain in winter, drought in summer. Plants are fire-adapted -- many actually need fire to release seeds. Found in California, the Mediterranean coast, parts of Chile, and southwestern Australia."
+  },
+  {
+    q: "What is a biogeochemical cycle?",
+    opts: [
+      "A cycle describing how organisms evolve over geological time periods",
+      "The movement of nutrients like water, carbon, and nitrogen through living things and the physical environment",
+      "The process by which ecosystems recover and rebuild after major disturbances",
+      "The way energy flows from producers through consumers in a food web"
+    ],
+    ans: 1,
+    explain: "Biogeochemical cycles track how nutrients move through an ecosystem -- from soil or air into plants, up the food chain, back to decomposers, and back into the environment. Carbon cycle, nitrogen cycle, water cycle -- all biogeochemical cycles."
+  },
+  {
+    q: "What is biomass?",
+    opts: [
+      "The total number of species present in an ecosystem",
+      "The total energy available at the base of the food chain",
+      "The total weight of all living matter in a specific area",
+      "The amount of nutrients available in the soil of a given region"
+    ],
+    ans: 2,
+    explain: "Biomass = total weight of living material. You can measure the biomass of plants in a field, fish in a lake, or bacteria in a soil sample. Ecological pyramids often show how biomass decreases from the bottom to the top of the food chain."
+  },
+  {
+    q: "What are four basic conditions all organisms need to survive?",
+    opts: [
+      "Sunlight, oxygen, soil, and moderate temperature",
+      "Nutrients, energy, liquid water, and suitable temperatures",
+      "Carbon, nitrogen, phosphorus, and water",
+      "Warmth, shelter, reproduction, and food"
+    ],
+    ans: 1,
+    explain: "The four basics for life: nutrients (to build bodies), energy (usually sunlight or food), liquid water (not ice, not steam), and suitable temperatures (not so extreme that proteins denature or water freezes solid)."
+  },
+  {
+    q: "How does life distribution in water differ from how it is distributed on land?",
+    opts: [
+      "Aquatic life is distributed mainly by temperature and precipitation, like on land",
+      "Aquatic life is distributed by light availability (photic vs aphotic zone), distance from shore, and nutrient availability",
+      "Aquatic life has no distribution pattern -- it is uniformly distributed throughout bodies of water",
+      "Aquatic life is distributed purely by salinity level regardless of other factors"
+    ],
+    ans: 1,
+    explain: "Land biomes = temperature + precipitation. Water biomes = light (photic vs aphotic), distance from shore (coastal vs open ocean), and nutrient levels. Different drivers, same idea -- physical conditions control where life thrives."
+  }
+];
+
+let answered = 0;
+let correct = 0;
+let missed = [];
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function buildQuiz() {
+  const wrap = document.getElementById('quizWrap');
+  wrap.innerHTML = '';
+  answered = 0; correct = 0; missed = [];
+  updateProgress();
+
+  const shuffled = shuffle(questions);
+
+  shuffled.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${i}`;
+
+    const letters = ['A', 'B', 'C', 'D'];
+
+    card.innerHTML = `
+      <div class="q-number">Question ${i + 1} of ${shuffled.length}</div>
+      <div class="q-text">${item.q}</div>
+      <div class="options" id="opts-${i}">
+        ${item.opts.map((opt, oi) => `
+          <button class="option-btn" onclick="select(${i}, ${oi}, ${item.ans}, this, '${escStr(item.explain)}')" data-q="${i}">
+            <span class="opt-letter">${letters[oi]}</span>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback" id="fb-${i}"></div>
+    `;
+
+    card._item = item;
+    wrap.appendChild(card);
+  });
+
+  window._shuffled = shuffled;
+}
+
+function escStr(s) {
+  return s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function select(qIdx, chosen, correct_idx, btn, explain) {
+  const opts = document.querySelectorAll(`[data-q="${qIdx}"]`);
+  opts.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById(`fb-${qIdx}`);
+  const card = document.getElementById(`card-${qIdx}`);
+  card.classList.add('answered');
+
+  answered++;
+
+  if (chosen === correct_idx) {
+    btn.classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = `✓ Correct! ${explain}`;
+    correct++;
+  } else {
+    btn.classList.add('wrong');
+    opts[correct_idx].classList.add('correct');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `✗ Not quite. ${explain}`;
+    missed.push({ q: window._shuffled[qIdx].q, a: window._shuffled[qIdx].opts[correct_idx] });
+  }
+
+  updateProgress();
+
+  if (answered === questions.length) {
+    setTimeout(showResults, 600);
+  }
+}
+
+function updateProgress() {
+  const bar = document.getElementById('progressBar');
+  const label = document.getElementById('scoreDisplay');
+  const pct = questions.length > 0 ? (answered / questions.length) * 100 : 0;
+  bar.style.width = pct + '%';
+  label.textContent = `${answered} / ${questions.length} answered  •  ${correct} correct`;
+}
+
+function showResults() {
+  document.getElementById('quizWrap').style.display = 'none';
+  const results = document.getElementById('results');
+  results.classList.add('show');
+
+  const pct = Math.round((correct / questions.length) * 100);
+  let scoreClass = pct >= 80 ? 'great' : pct >= 60 ? 'ok' : 'bad';
+  let msg = pct >= 80 ? "You know this stuff." : pct >= 60 ? "Getting there. Review the misses." : "Go back through the study guide.";
+
+  let missedHTML = '';
+  if (missed.length > 0) {
+    missedHTML = `
+      <div class="missed-list">
+        <h3>Review These</h3>
+        ${missed.map(m => `
+          <div class="missed-item">
+            ${m.q}<br>
+            <span>→ ${m.a}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  results.innerHTML = `
+    <div class="result-label">Final Score</div>
+    <div class="result-score ${scoreClass}">${pct}%</div>
+    <div class="result-msg">${msg}</div>
+    <div style="color:var(--muted); font-size:13px; margin-bottom: 8px;">${correct} correct out of ${questions.length}</div>
+    ${missedHTML}
+    <button class="retry-btn" onclick="retry()">Try Again</button>
+  `;
+}
+
+function retry() {
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('quizWrap').style.display = '';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio 101 — Chapter 2 Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #2a2a3a;
+    --accent: #00e5a0;
+    --accent2: #ff4d6d;
+    --accent3: #7b61ff;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --correct: #00e5a0;
+    --wrong: #ff4d6d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background-image: radial-gradient(ellipse at 20% 0%, rgba(123,97,255,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, rgba(0,229,160,0.06) 0%, transparent 60%);
+  }
+
+  header { text-align: center; margin-bottom: 48px; }
+
+  header .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--text);
+  }
+
+  header h1 span { color: var(--accent); }
+
+  .progress-bar-wrap {
+    max-width: 680px;
+    margin: 24px auto 0;
+    background: var(--border);
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .score-display {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  .restart-btn {
+    display: inline-block;
+    margin-top: 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .restart-btn:hover {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    background: rgba(255,77,109,0.06);
+  }
+
+  .quiz-wrap { max-width: 680px; margin: 0 auto; }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    transition: border-color 0.3s;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .question-card.answered::before { opacity: 1; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .q-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .options { display: grid; gap: 10px; }
+
+  .option-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1.4;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent3);
+    background: rgba(123,97,255,0.08);
+    transform: translateX(4px);
+  }
+
+  .option-btn .opt-letter {
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 18px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+
+  .option-btn:hover:not(:disabled) .opt-letter { color: var(--accent3); }
+
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(0,229,160,0.08);
+    color: var(--correct);
+  }
+
+  .option-btn.correct .opt-letter { color: var(--correct); }
+
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,77,109,0.08);
+    color: var(--wrong);
+  }
+
+  .option-btn.wrong .opt-letter { color: var(--wrong); }
+  .option-btn:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    display: none;
+  }
+
+  .feedback.correct {
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.3);
+    color: var(--correct);
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.3);
+    color: #ff8fa3;
+    display: block;
+  }
+
+  .feedback .correct-ans {
+    color: var(--correct);
+    font-weight: 500;
+    margin-top: 6px;
+  }
+
+  #results {
+    display: none;
+    text-align: center;
+    padding: 60px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  #results.show { display: block; animation: slideIn 0.4s ease; }
+
+  .result-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -4px;
+    margin: 16px 0;
+  }
+
+  .result-score.great { color: var(--correct); }
+  .result-score.ok { color: #ffd166; }
+  .result-score.bad { color: var(--wrong); }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .result-msg {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: var(--text);
+  }
+
+  .retry-btn {
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 16px 40px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .retry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,229,160,0.25);
+  }
+
+  .missed-list {
+    text-align: left;
+    margin: 32px 0;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+
+  .missed-list h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wrong);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .missed-item {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+  }
+
+  .missed-item span { color: var(--correct); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">BI101 // Chapter 2</div>
+  <h1>Chemistry of <span>Life</span></h1>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="score-display" id="scoreDisplay">0 / 0 answered</div>
+  <button class="restart-btn" onclick="retry()">&#8635; Restart &amp; Shuffle</button>
+</header>
+
+<div class="quiz-wrap" id="quizWrap"></div>
+<div id="results"></div>
+
+<script>
+const questions = [
+  {
+    q: "Which subatomic particle determines what element an atom is?",
+    opts: [
+      "Electrons",
+      "Neutrons",
+      "Protons",
+      "Photons"
+    ],
+    ans: 2,
+    explain: "The atomic number = number of protons. Change the proton count and you have a completely different element. Carbon has 6 protons, oxygen has 8 -- that is what makes them different."
+  },
+  {
+    q: "How is atomic mass calculated?",
+    opts: [
+      "By counting only the protons",
+      "By counting only the electrons",
+      "By adding protons and neutrons together",
+      "By adding all subatomic particles including electrons"
+    ],
+    ans: 2,
+    explain: "Atomic mass = protons + neutrons. Electrons are so tiny they barely contribute to mass, so they are ignored in the calculation."
+  },
+  {
+    q: "What is an ion?",
+    opts: [
+      "An atom with equal numbers of protons and electrons",
+      "An atom that has gained or lost electrons, giving it an electric charge",
+      "A molecule made of two or more atoms bonded together",
+      "A neutral particle found in the nucleus"
+    ],
+    ans: 1,
+    explain: "Ions form when atoms gain or lose electrons. Gain an electron = negative charge. Lose an electron = positive charge. Either way, the atom is now electrically charged -- it is an ion."
+  },
+  {
+    q: "A cation has a ________ charge because it ________ electrons.",
+    opts: [
+      "Negative / gained",
+      "Positive / lost",
+      "Negative / lost",
+      "Neutral / kept the same number of"
+    ],
+    ans: 1,
+    explain: "Cation = positive. It lost electrons (negative particles), so positive protons now outnumber electrons. Memory trick: Ca+ion has a plus sign hidden in it."
+  },
+  {
+    q: "An anion has a ________ charge because it ________ electrons.",
+    opts: [
+      "Positive / gained",
+      "Neutral / lost",
+      "Negative / gained",
+      "Positive / lost"
+    ],
+    ans: 2,
+    explain: "Anion = negative. It gained electrons (negative particles), so now there are more electrons than protons. Anion sounds like a negative ion -- that memory trick works."
+  },
+  {
+    q: "How many electrons can fit in the first, second, and third electron shells?",
+    opts: [
+      "2, 4, 6",
+      "1, 2, 3",
+      "2, 8, 8",
+      "4, 8, 12"
+    ],
+    ans: 2,
+    explain: "Shell 1 holds max 2 electrons. Shells 2 and 3 each hold max 8 electrons. Remember: 2-8-8. This determines how atoms bond because they want their outer shell full."
+  },
+  {
+    q: "What are valence electrons?",
+    opts: [
+      "Electrons in the innermost shell of an atom",
+      "Electrons located inside the nucleus",
+      "Electrons in the outermost shell that determine how an atom bonds",
+      "Electrons that carry a negative charge"
+    ],
+    ans: 2,
+    explain: "Valence electrons are the outer-shell electrons. Atoms want their outer shell full (octet rule), so they bond with other atoms by sharing, gaining, or losing these outer electrons."
+  },
+  {
+    q: "According to the octet rule, atoms are most stable when they have _______ electrons in their outer shell.",
+    opts: [
+      "2",
+      "4",
+      "6",
+      "8"
+    ],
+    ans: 3,
+    explain: "Atoms want 8 electrons in their outer shell to be stable (except the first shell, which is full at 2). This drive to reach 8 is why atoms form bonds -- sharing, gaining, or losing electrons to get there."
+  },
+  {
+    q: "What acronym helps remember the four most abundant elements in living organisms?",
+    opts: [
+      "SOAP",
+      "CHON",
+      "HOCN",
+      "CASH"
+    ],
+    ans: 1,
+    explain: "CHON = Carbon, Hydrogen, Oxygen, Nitrogen. These four elements make up about 96% of your body. Everything else is trace amounts."
+  },
+  {
+    q: "What is the chemical symbol for potassium?",
+    opts: [
+      "P",
+      "Po",
+      "K",
+      "Pt"
+    ],
+    ans: 2,
+    explain: "Potassium = K, from its Latin name Kalium. This trips people up because you would expect P -- but P is phosphorus. Know your symbols: K=potassium, Na=sodium, Ca=calcium, Fe=iron."
+  },
+  {
+    q: "In an ionic bond, what happens to the electrons?",
+    opts: [
+      "They are shared equally between both atoms",
+      "They are shared unevenly, with one atom hogging them",
+      "One atom completely steals electrons from the other",
+      "No electrons are involved in the bond at all"
+    ],
+    ans: 2,
+    explain: "Ionic bond = electron theft. One atom has such a strong pull (high electronegativity) that it completely takes electrons from the other. Now one atom is negative and the other is positive, and opposites attract."
+  },
+  {
+    q: "What makes a covalent bond 'polar'?",
+    opts: [
+      "The atoms come from completely different elements",
+      "One atom has a slightly stronger pull on the shared electrons than the other",
+      "The electrons are shared perfectly equally between both atoms",
+      "One atom steals electrons completely from the other"
+    ],
+    ans: 1,
+    explain: "Polar covalent = unequal sharing. One atom has higher electronegativity and hogs the electrons, creating a partial negative end and a partial positive end. Water is the classic example."
+  },
+  {
+    q: "In a nonpolar covalent bond, electrons are:",
+    opts: [
+      "Transferred completely from one atom to the other",
+      "Shared unevenly between atoms of different elements",
+      "Shared equally between atoms of similar electronegativity",
+      "Not shared at all"
+    ],
+    ans: 2,
+    explain: "Nonpolar = equal sharing. Both atoms have the same (or very similar) pull on the electrons, so neither side wins the tug-of-war. No partial charges, no polarity."
+  },
+  {
+    q: "What is a hydrogen bond?",
+    opts: [
+      "A strong covalent bond that forms between two hydrogen atoms",
+      "A weak attraction between the slightly positive hydrogen of one molecule and the slightly negative atom of another molecule",
+      "An ionic bond that forms when hydrogen loses an electron completely",
+      "The covalent bond inside a water molecule holding hydrogen to oxygen"
+    ],
+    ans: 1,
+    explain: "A hydrogen bond is NOT a bond inside a molecule -- it is a weak attraction BETWEEN separate molecules. The slightly positive H of one molecule is attracted to a slightly negative O or N of another. Weak but crucial."
+  },
+  {
+    q: "What is electronegativity?",
+    opts: [
+      "The number of protons in an atom's nucleus",
+      "The number of electrons in the outermost shell",
+      "How strongly an atom pulls shared electrons toward itself in a bond",
+      "The charge of an ion after gaining electrons"
+    ],
+    ans: 2,
+    explain: "Electronegativity is like grip strength in a tug-of-war over electrons. High electronegativity = strong pull = hogging the shared electrons. This determines what type of bond forms."
+  },
+  {
+    q: "Why is water a polar molecule?",
+    opts: [
+      "Oxygen and hydrogen have equal electronegativity",
+      "Oxygen pulls the shared electrons more strongly, creating partial negative and positive ends",
+      "The hydrogen atoms have more electrons than the oxygen atom",
+      "Water molecules are unusually large compared to other molecules"
+    ],
+    ans: 1,
+    explain: "Oxygen is highly electronegative -- it hogs the shared electrons. This makes the oxygen end partially negative (delta minus) and the hydrogen ends partially positive (delta plus). Water is polar."
+  },
+  {
+    q: "Which property of water is responsible for water climbing up a paper towel?",
+    opts: [
+      "Surface tension",
+      "Cohesion",
+      "Adhesion",
+      "High specific heat"
+    ],
+    ans: 2,
+    explain: "Adhesion = water sticking to OTHER surfaces (like paper). Cohesion = water sticking to other water molecules. Both matter for capillary action, but adhesion drives the climbing."
+  },
+  {
+    q: "What gives water high surface tension?",
+    opts: [
+      "The unusually large size of water molecules",
+      "The ionic bonds between water molecules",
+      "The tight cohesion between surface water molecules held together by hydrogen bonds",
+      "The high temperature of liquid water"
+    ],
+    ans: 2,
+    explain: "Surface water molecules form hydrogen bonds with neighbors on the sides and below -- but not above. This creates an inward pull that makes the surface act like a stretched film. High surface tension."
+  },
+  {
+    q: "What is a salt?",
+    opts: [
+      "A polar covalent compound made of two nonmetals",
+      "A molecule held together by hydrogen bonds",
+      "A compound formed when a cation and an anion bond together through an ionic bond",
+      "An organic compound with long carbon chains"
+    ],
+    ans: 2,
+    explain: "Salt = ionic compound. A positive cation and a negative anion lock together. Table salt (NaCl) = sodium cation (Na+) + chloride anion (Cl-) held by ionic attraction."
+  },
+  {
+    q: "Which of the following is an example of a hydrophobic substance?",
+    opts: [
+      "Table salt dissolving in water",
+      "Sugar dissolving completely in water",
+      "Oil clumping together and floating on top of water",
+      "Water climbing up a paper towel"
+    ],
+    ans: 2,
+    explain: "Oil is hydrophobic -- water-fearing. Its nonpolar C-H bonds cannot form hydrogen bonds with polar water, so oil and water separate. Salt and sugar are hydrophilic -- they dissolve in water easily."
+  },
+  {
+    q: "The symbol 'Na' represents which element?",
+    opts: [
+      "Nitrogen",
+      "Neon",
+      "Sodium",
+      "Nickel"
+    ],
+    ans: 2,
+    explain: "Na = sodium, from its Latin name Natrium. Another one that trips people up: N is nitrogen, not sodium. Know these: Na=sodium, K=potassium, Ca=calcium, Cl=chlorine, P=phosphorus."
+  },
+  {
+    q: "An atom has atomic number 8 and atomic mass 16. How many neutrons does it have?",
+    opts: [
+      "8",
+      "16",
+      "24",
+      "6"
+    ],
+    ans: 0,
+    explain: "Neutrons = atomic mass minus atomic number. 16 - 8 = 8 neutrons. This atom is oxygen. Atomic number tells you protons (8), atomic mass tells you protons + neutrons (16), so neutrons = 8."
+  },
+  {
+    q: "How does electronegativity difference determine bond type?",
+    opts: [
+      "No difference = ionic; small difference = polar covalent; large difference = nonpolar covalent",
+      "No difference = nonpolar covalent; small difference = polar covalent; large difference = ionic",
+      "Any difference = hydrogen bond regardless of size",
+      "Electronegativity only affects whether a bond forms, not its type"
+    ],
+    ans: 1,
+    explain: "Equal pull = nonpolar covalent (even sharing). Slight difference = polar covalent (uneven sharing). Huge difference = ionic (one atom steals the electron). The bigger the gap, the more ionic the bond."
+  }
+];
+
+let answered = 0;
+let correct = 0;
+let missed = [];
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function buildQuiz() {
+  const wrap = document.getElementById('quizWrap');
+  wrap.innerHTML = '';
+  answered = 0; correct = 0; missed = [];
+  updateProgress();
+
+  const shuffled = shuffle(questions);
+
+  shuffled.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${i}`;
+
+    const letters = ['A', 'B', 'C', 'D'];
+
+    card.innerHTML = `
+      <div class="q-number">Question ${i + 1} of ${shuffled.length}</div>
+      <div class="q-text">${item.q}</div>
+      <div class="options" id="opts-${i}">
+        ${item.opts.map((opt, oi) => `
+          <button class="option-btn" onclick="select(${i}, ${oi}, ${item.ans}, this, '${escStr(item.explain)}')" data-q="${i}">
+            <span class="opt-letter">${letters[oi]}</span>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback" id="fb-${i}"></div>
+    `;
+
+    card._item = item;
+    wrap.appendChild(card);
+  });
+
+  window._shuffled = shuffled;
+}
+
+function escStr(s) {
+  return s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function select(qIdx, chosen, correct_idx, btn, explain) {
+  const opts = document.querySelectorAll(`[data-q="${qIdx}"]`);
+  opts.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById(`fb-${qIdx}`);
+  const card = document.getElementById(`card-${qIdx}`);
+  card.classList.add('answered');
+
+  answered++;
+
+  if (chosen === correct_idx) {
+    btn.classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = `✓ Correct! ${explain}`;
+    correct++;
+  } else {
+    btn.classList.add('wrong');
+    opts[correct_idx].classList.add('correct');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `✗ Not quite. ${explain}`;
+    missed.push({ q: window._shuffled[qIdx].q, a: window._shuffled[qIdx].opts[correct_idx] });
+  }
+
+  updateProgress();
+
+  if (answered === questions.length) {
+    setTimeout(showResults, 600);
+  }
+}
+
+function updateProgress() {
+  const bar = document.getElementById('progressBar');
+  const label = document.getElementById('scoreDisplay');
+  const pct = questions.length > 0 ? (answered / questions.length) * 100 : 0;
+  bar.style.width = pct + '%';
+  label.textContent = `${answered} / ${questions.length} answered  •  ${correct} correct`;
+}
+
+function showResults() {
+  document.getElementById('quizWrap').style.display = 'none';
+  const results = document.getElementById('results');
+  results.classList.add('show');
+
+  const pct = Math.round((correct / questions.length) * 100);
+  let scoreClass = pct >= 80 ? 'great' : pct >= 60 ? 'ok' : 'bad';
+  let msg = pct >= 80 ? "You know this stuff." : pct >= 60 ? "Getting there. Review the misses." : "Go back through the study guide.";
+
+  let missedHTML = '';
+  if (missed.length > 0) {
+    missedHTML = `
+      <div class="missed-list">
+        <h3>Review These</h3>
+        ${missed.map(m => `
+          <div class="missed-item">
+            ${m.q}<br>
+            <span>→ ${m.a}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  results.innerHTML = `
+    <div class="result-label">Final Score</div>
+    <div class="result-score ${scoreClass}">${pct}%</div>
+    <div class="result-msg">${msg}</div>
+    <div style="color:var(--muted); font-size:13px; margin-bottom: 8px;">${correct} correct out of ${questions.length}</div>
+    ${missedHTML}
+    <button class="retry-btn" onclick="retry()">Try Again</button>
+  `;
+}
+
+function retry() {
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('quizWrap').style.display = '';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

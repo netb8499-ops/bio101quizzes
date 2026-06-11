@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio 101 — Chapter 4 Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #2a2a3a;
+    --accent: #00e5a0;
+    --accent2: #ff4d6d;
+    --accent3: #7b61ff;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --correct: #00e5a0;
+    --wrong: #ff4d6d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background-image: radial-gradient(ellipse at 20% 0%, rgba(123,97,255,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, rgba(0,229,160,0.06) 0%, transparent 60%);
+  }
+
+  header { text-align: center; margin-bottom: 48px; }
+
+  header .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--text);
+  }
+
+  header h1 span { color: var(--accent); }
+
+  .progress-bar-wrap {
+    max-width: 680px;
+    margin: 24px auto 0;
+    background: var(--border);
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .score-display {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  .restart-btn {
+    display: inline-block;
+    margin-top: 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .restart-btn:hover {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    background: rgba(255,77,109,0.06);
+  }
+
+  .quiz-wrap { max-width: 680px; margin: 0 auto; }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    transition: border-color 0.3s;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .question-card.answered::before { opacity: 1; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .q-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .options { display: grid; gap: 10px; }
+
+  .option-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1.4;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent3);
+    background: rgba(123,97,255,0.08);
+    transform: translateX(4px);
+  }
+
+  .option-btn .opt-letter {
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 18px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+
+  .option-btn:hover:not(:disabled) .opt-letter { color: var(--accent3); }
+
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(0,229,160,0.08);
+    color: var(--correct);
+  }
+
+  .option-btn.correct .opt-letter { color: var(--correct); }
+
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,77,109,0.08);
+    color: var(--wrong);
+  }
+
+  .option-btn.wrong .opt-letter { color: var(--wrong); }
+  .option-btn:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    display: none;
+  }
+
+  .feedback.correct {
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.3);
+    color: var(--correct);
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.3);
+    color: #ff8fa3;
+    display: block;
+  }
+
+  #results {
+    display: none;
+    text-align: center;
+    padding: 60px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  #results.show { display: block; animation: slideIn 0.4s ease; }
+
+  .result-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -4px;
+    margin: 16px 0;
+  }
+
+  .result-score.great { color: var(--correct); }
+  .result-score.ok { color: #ffd166; }
+  .result-score.bad { color: var(--wrong); }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .result-msg {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: var(--text);
+  }
+
+  .retry-btn {
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 16px 40px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .retry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,229,160,0.25);
+  }
+
+  .missed-list {
+    text-align: left;
+    margin: 32px 0;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+
+  .missed-list h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wrong);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .missed-item {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+  }
+
+  .missed-item span { color: var(--correct); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">BI101 // Chapter 4</div>
+  <h1>Cell <span>Structure</span></h1>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="score-display" id="scoreDisplay">0 / 0 answered</div>
+  <button class="restart-btn" onclick="retry()">&#8635; Restart &amp; Shuffle</button>
+</header>
+
+<div class="quiz-wrap" id="quizWrap"></div>
+<div id="results"></div>
+
+<script>
+const questions = [
+  {
+    q: "Which four components are found in ALL cells -- both prokaryotic and eukaryotic?",
+    opts: [
+      "Nucleus, mitochondria, cell wall, ribosomes",
+      "Plasma membrane, cytosol, DNA, ribosomes",
+      "Chloroplasts, vacuoles, nucleus, Golgi apparatus",
+      "Cell wall, cilia, flagella, lysosomes"
+    ],
+    ans: 1,
+    explain: "All cells share these four: plasma membrane (outer boundary), cytosol (jelly-like interior fluid), DNA (genetic instructions), and ribosomes (protein builders). Everything else varies."
+  },
+  {
+    q: "Why do cells need to stay small?",
+    opts: [
+      "Larger cells would have too much DNA to manage",
+      "As a cell grows, its volume increases much faster than its surface area -- the membrane can no longer serve the interior",
+      "Small cells can divide faster and pass on genes more efficiently",
+      "Large cells produce dangerously high amounts of protein"
+    ],
+    ans: 1,
+    explain: "Surface area to volume ratio -- as size increases, volume outpaces surface area. If a cell gets too big, the membrane (surface area) cannot import enough nutrients or export waste fast enough to keep up. The cell dies."
+  },
+  {
+    q: "What is the cytoplasm?",
+    opts: [
+      "The outer membrane of the cell only",
+      "Only the fluid (cytosol) portion inside the cell",
+      "Everything inside the cell membrane EXCEPT the nucleus",
+      "The genetic material of the cell"
+    ],
+    ans: 2,
+    explain: "Cytoplasm = everything inside the membrane minus the nucleus. This includes the cytosol (the jelly fluid) plus all the organelles floating in it."
+  },
+  {
+    q: "What is the key structural difference between prokaryotic and eukaryotic cells?",
+    opts: [
+      "Only eukaryotes have a cell membrane",
+      "Eukaryotes have a membrane-bound nucleus containing their DNA; prokaryotes have DNA floating free",
+      "Prokaryotes are always larger and more complex than eukaryotes",
+      "Only prokaryotes have ribosomes for building proteins"
+    ],
+    ans: 1,
+    explain: "Eukaryotes = true nucleus (DNA locked in a membrane-bound compartment). Prokaryotes = no nucleus (DNA floats free in the cytoplasm). Both have membranes and ribosomes -- that is not the distinction."
+  },
+  {
+    q: "What is the function of nuclear pores?",
+    opts: [
+      "They provide structural support to the nuclear envelope",
+      "They store DNA in separate compartments inside the nucleus",
+      "They act as gatekeepers controlling what molecules move in and out of the nucleus",
+      "They produce ribosomal subunits and export them to the cytoplasm"
+    ],
+    ans: 2,
+    explain: "Nuclear pores are tunnels in the nuclear envelope. They control traffic -- letting RNA out (so ribosomes can use it to build proteins) and letting signals and proteins in. Selective access to the nucleus."
+  },
+  {
+    q: "What is the nuclear envelope?",
+    opts: [
+      "A single lipid layer surrounding the DNA strands",
+      "Part of the endoplasmic reticulum that wraps tightly around DNA",
+      "A double membrane (two lipid bilayers) that surrounds and protects the nucleus",
+      "The same structure as the plasma membrane but located inside the cell"
+    ],
+    ans: 2,
+    explain: "Nuclear envelope = double membrane. Two phospholipid bilayers surrounding the nucleus. It separates the nucleus from the cytoplasm and has nuclear pores punched through it for controlled transport."
+  },
+  {
+    q: "What is the difference between rough ER and smooth ER?",
+    opts: [
+      "Rough ER makes lipids; smooth ER folds and modifies proteins",
+      "Rough ER has ribosomes attached and folds proteins; smooth ER has no ribosomes and makes lipids",
+      "Rough ER is found only in plant cells; smooth ER is found only in animal cells",
+      "They are the same structure -- rough and smooth just describe different parts of the same membrane"
+    ],
+    ans: 1,
+    explain: "Rough ER = studded with ribosomes (looks bumpy) = protein factory. Smooth ER = no ribosomes (looks smooth) = makes lipids, breaks down toxins, stores calcium. Easy to remember: rough = ribosomes = proteins."
+  },
+  {
+    q: "What does the Golgi apparatus do?",
+    opts: [
+      "Generates ATP energy through cellular respiration",
+      "Stores DNA and RNA for long-term use",
+      "Finishes, sorts, and packages proteins and lipids into vesicles for shipping inside or outside the cell",
+      "Breaks down old and damaged organelles for recycling"
+    ],
+    ans: 2,
+    explain: "Golgi = the cell post office. Receives proteins from the ER, finishes processing them (like adding sugar tags), sorts them by destination, and ships them out in vesicles. Stack of flattened sacs = looks like a stack of pancakes."
+  },
+  {
+    q: "What are lysosomes and what is their job?",
+    opts: [
+      "The cell power plants -- they convert food into ATP",
+      "Membrane-bound sacs packed with digestive enzymes that break down waste, old cell parts, and invaders",
+      "Structures that transport materials between the ER and Golgi apparatus",
+      "The main energy storage site in the cell"
+    ],
+    ans: 1,
+    explain: "Lysosomes = the cell recycling center. They contain powerful digestive enzymes and break down everything from worn-out organelles to bacteria that entered the cell. Your immune cells use lysosomes to destroy pathogens."
+  },
+  {
+    q: "What are vesicles?",
+    opts: [
+      "Large permanent storage sacs for water and nutrients",
+      "Tiny temporary membrane-bound pods that move materials from one location to another inside the cell",
+      "The protein-building structures found on the rough ER",
+      "The folded inner membranes of mitochondria"
+    ],
+    ans: 1,
+    explain: "Vesicles are like delivery trucks inside the cell. They bud off from one membrane (like the Golgi), carry cargo, and fuse with another membrane (like the plasma membrane) to deliver it. Temporary, not permanent."
+  },
+  {
+    q: "What is the primary function of mitochondria?",
+    opts: [
+      "Synthesizing proteins from RNA instructions",
+      "Performing photosynthesis to capture sunlight energy",
+      "Converting chemical energy from food into usable ATP through cellular respiration",
+      "Packaging and shipping proteins throughout the cell"
+    ],
+    ans: 2,
+    explain: "Mitochondria = powerhouse of the cell. They take glucose and oxygen, run cellular respiration, and produce ATP -- the energy currency your cells actually use to do work. Without them, no usable energy."
+  },
+  {
+    q: "The folded inner membrane structures of mitochondria are called:",
+    opts: [
+      "Thylakoids",
+      "Stroma",
+      "Cristae",
+      "Grana"
+    ],
+    ans: 2,
+    explain: "Cristae = the folds of the inner mitochondrial membrane. They dramatically increase surface area -- more surface area = more space for the protein machinery that makes ATP. More folds = more power output."
+  },
+  {
+    q: "Which organelle is found in plant and algae cells but NOT in animal cells?",
+    opts: [
+      "Mitochondria",
+      "Ribosomes",
+      "Lysosomes",
+      "Chloroplasts"
+    ],
+    ans: 3,
+    explain: "Chloroplasts are the photosynthesis organelles -- plants and algae have them, animal cells do not. Animal cells make ATP through cellular respiration only. Plants do both respiration AND photosynthesis."
+  },
+  {
+    q: "In chloroplasts, the disc-like sacs that contain chlorophyll and where photosynthesis reactions occur are called:",
+    opts: [
+      "Cristae",
+      "Thylakoids",
+      "Stroma",
+      "Vacuoles"
+    ],
+    ans: 1,
+    explain: "Thylakoids = stacked disc-like membrane sacs inside chloroplasts. They contain chlorophyll (the green pigment that captures light). The stacks are called grana. The fluid surrounding them is the stroma."
+  },
+  {
+    q: "What is the main function of the cytoskeleton?",
+    opts: [
+      "To produce and package proteins for export",
+      "To give the cell its shape, provide structural support, enable movement, and act as internal transport tracks",
+      "To store the cell genetic material in an organized way",
+      "To absorb sunlight energy and convert it for cellular use"
+    ],
+    ans: 1,
+    explain: "Cytoskeleton = the cell scaffold. Made of protein fibers (microfilaments, intermediate filaments, microtubules). Gives shape, supports movement (cilia/flagella), holds organelles in place, and provides tracks for vesicles to travel on."
+  },
+  {
+    q: "What is the function of the cell wall?",
+    opts: [
+      "Controls what enters and exits the cell (selective permeability)",
+      "Stores the cell genetic material and protects DNA",
+      "Provides extra structural support and prevents the cell from bursting when it absorbs too much water",
+      "Digests nutrients and broken-down organelles"
+    ],
+    ans: 2,
+    explain: "Cell walls (in plants, fungi, bacteria) are rigid outer layers outside the cell membrane. They give structural strength and resist the expansion from water uptake. Plant cells become firm (turgid) instead of bursting because the wall holds them."
+  },
+  {
+    q: "How are cilia different from flagella?",
+    opts: [
+      "Cilia are found only in plant cells; flagella are found only in animal cells",
+      "Cilia are long and few in number; flagella are short and numerous",
+      "Cilia are short and numerous (like tiny oars); flagella are long and few (like whips or tails)",
+      "They perform identical functions and the names are interchangeable"
+    ],
+    ans: 2,
+    explain: "Cilia = short, lots of them, beat like oars to move fluid across a surface (like in your airways). Flagella = long, usually one or few, whip-like motion to propel the whole cell (like a sperm tail)."
+  },
+  {
+    q: "What is the primary function of ribosomes?",
+    opts: [
+      "Package and ship proteins to other parts of the cell",
+      "Break down old or damaged proteins",
+      "Build proteins by reading instructions from messenger RNA",
+      "Generate ATP for cellular energy needs"
+    ],
+    ans: 2,
+    explain: "Ribosomes = protein factories. They read the mRNA sequence (which came from DNA instructions in the nucleus) and string together amino acids in the correct order to build a protein."
+  },
+  {
+    q: "What is the primary function of vacuoles in plant cells?",
+    opts: [
+      "Generate energy for the cell through photosynthesis",
+      "Store water, nutrients, and waste products -- and help maintain turgor pressure",
+      "Break down foreign bacteria and cellular debris",
+      "Transport chemical signals directly to the nucleus"
+    ],
+    ans: 1,
+    explain: "Plant vacuoles are huge storage tanks. They store water (maintaining the turgor pressure that keeps plants firm and upright), nutrients, pigments, and waste. A fully filled vacuole pushes against the cell wall -- that is what makes plants stiff."
+  },
+  {
+    q: "What are organelles?",
+    opts: [
+      "The DNA-containing control center of the cell",
+      "Tiny specialized structures inside a eukaryotic cell, each with a specific job -- like miniature organs",
+      "Structures found only in plant cells to support photosynthesis",
+      "The outer protective layers that surround a cell"
+    ],
+    ans: 1,
+    explain: "Organelles = tiny organs inside the cell. Each one has a specialized job: nucleus directs, mitochondria power, ribosomes build, Golgi ships, lysosomes clean up. Together they keep the cell running."
+  }
+];
+
+let answered = 0;
+let correct = 0;
+let missed = [];
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function buildQuiz() {
+  const wrap = document.getElementById('quizWrap');
+  wrap.innerHTML = '';
+  answered = 0; correct = 0; missed = [];
+  updateProgress();
+
+  const shuffled = shuffle(questions);
+
+  shuffled.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${i}`;
+
+    const letters = ['A', 'B', 'C', 'D'];
+
+    card.innerHTML = `
+      <div class="q-number">Question ${i + 1} of ${shuffled.length}</div>
+      <div class="q-text">${item.q}</div>
+      <div class="options" id="opts-${i}">
+        ${item.opts.map((opt, oi) => `
+          <button class="option-btn" onclick="select(${i}, ${oi}, ${item.ans}, this, '${escStr(item.explain)}')" data-q="${i}">
+            <span class="opt-letter">${letters[oi]}</span>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback" id="fb-${i}"></div>
+    `;
+
+    card._item = item;
+    wrap.appendChild(card);
+  });
+
+  window._shuffled = shuffled;
+}
+
+function escStr(s) {
+  return s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function select(qIdx, chosen, correct_idx, btn, explain) {
+  const opts = document.querySelectorAll(`[data-q="${qIdx}"]`);
+  opts.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById(`fb-${qIdx}`);
+  const card = document.getElementById(`card-${qIdx}`);
+  card.classList.add('answered');
+
+  answered++;
+
+  if (chosen === correct_idx) {
+    btn.classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = `✓ Correct! ${explain}`;
+    correct++;
+  } else {
+    btn.classList.add('wrong');
+    opts[correct_idx].classList.add('correct');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `✗ Not quite. ${explain}`;
+    missed.push({ q: window._shuffled[qIdx].q, a: window._shuffled[qIdx].opts[correct_idx] });
+  }
+
+  updateProgress();
+
+  if (answered === questions.length) {
+    setTimeout(showResults, 600);
+  }
+}
+
+function updateProgress() {
+  const bar = document.getElementById('progressBar');
+  const label = document.getElementById('scoreDisplay');
+  const pct = questions.length > 0 ? (answered / questions.length) * 100 : 0;
+  bar.style.width = pct + '%';
+  label.textContent = `${answered} / ${questions.length} answered  •  ${correct} correct`;
+}
+
+function showResults() {
+  document.getElementById('quizWrap').style.display = 'none';
+  const results = document.getElementById('results');
+  results.classList.add('show');
+
+  const pct = Math.round((correct / questions.length) * 100);
+  let scoreClass = pct >= 80 ? 'great' : pct >= 60 ? 'ok' : 'bad';
+  let msg = pct >= 80 ? "You know this stuff." : pct >= 60 ? "Getting there. Review the misses." : "Go back through the study guide.";
+
+  let missedHTML = '';
+  if (missed.length > 0) {
+    missedHTML = `
+      <div class="missed-list">
+        <h3>Review These</h3>
+        ${missed.map(m => `
+          <div class="missed-item">
+            ${m.q}<br>
+            <span>→ ${m.a}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  results.innerHTML = `
+    <div class="result-label">Final Score</div>
+    <div class="result-score ${scoreClass}">${pct}%</div>
+    <div class="result-msg">${msg}</div>
+    <div style="color:var(--muted); font-size:13px; margin-bottom: 8px;">${correct} correct out of ${questions.length}</div>
+    ${missedHTML}
+    <button class="retry-btn" onclick="retry()">Try Again</button>
+  `;
+}
+
+function retry() {
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('quizWrap').style.display = '';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

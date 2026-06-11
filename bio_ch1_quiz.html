@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio 101 — Chapter 1 Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #2a2a3a;
+    --accent: #00e5a0;
+    --accent2: #ff4d6d;
+    --accent3: #7b61ff;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --correct: #00e5a0;
+    --wrong: #ff4d6d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background-image: radial-gradient(ellipse at 20% 0%, rgba(123,97,255,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, rgba(0,229,160,0.06) 0%, transparent 60%);
+  }
+
+  header { text-align: center; margin-bottom: 48px; }
+
+  header .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--text);
+  }
+
+  header h1 span { color: var(--accent); }
+
+  .progress-bar-wrap {
+    max-width: 680px;
+    margin: 24px auto 0;
+    background: var(--border);
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .score-display {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  .restart-btn {
+    display: inline-block;
+    margin-top: 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .restart-btn:hover {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    background: rgba(255,77,109,0.06);
+  }
+
+  .quiz-wrap { max-width: 680px; margin: 0 auto; }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    transition: border-color 0.3s;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .question-card.answered::before { opacity: 1; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .q-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .options { display: grid; gap: 10px; }
+
+  .option-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1.4;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent3);
+    background: rgba(123,97,255,0.08);
+    transform: translateX(4px);
+  }
+
+  .option-btn .opt-letter {
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 18px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+
+  .option-btn:hover:not(:disabled) .opt-letter { color: var(--accent3); }
+
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(0,229,160,0.08);
+    color: var(--correct);
+  }
+
+  .option-btn.correct .opt-letter { color: var(--correct); }
+
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,77,109,0.08);
+    color: var(--wrong);
+  }
+
+  .option-btn.wrong .opt-letter { color: var(--wrong); }
+  .option-btn:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    display: none;
+  }
+
+  .feedback.correct {
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.3);
+    color: var(--correct);
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.3);
+    color: #ff8fa3;
+    display: block;
+  }
+
+  .feedback .correct-ans {
+    color: var(--correct);
+    font-weight: 500;
+    margin-top: 6px;
+  }
+
+  #results {
+    display: none;
+    text-align: center;
+    padding: 60px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  #results.show { display: block; animation: slideIn 0.4s ease; }
+
+  .result-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -4px;
+    margin: 16px 0;
+  }
+
+  .result-score.great { color: var(--correct); }
+  .result-score.ok { color: #ffd166; }
+  .result-score.bad { color: var(--wrong); }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .result-msg {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: var(--text);
+  }
+
+  .retry-btn {
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 16px 40px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .retry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,229,160,0.25);
+  }
+
+  .missed-list {
+    text-align: left;
+    margin: 32px 0;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+
+  .missed-list h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wrong);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .missed-item {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+  }
+
+  .missed-item span { color: var(--correct); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">BI101 // Chapter 1</div>
+  <h1>The Study of <span>Life</span></h1>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="score-display" id="scoreDisplay">0 / 0 answered</div>
+  <button class="restart-btn" onclick="retry()">&#8635; Restart &amp; Shuffle</button>
+</header>
+
+<div class="quiz-wrap" id="quizWrap"></div>
+<div id="results"></div>
+
+<script>
+const questions = [
+  {
+    q: "What is biology?",
+    opts: [
+      "The study of chemistry and the physical properties of matter",
+      "The study of Earth's geological history and rock formations",
+      "The study of life -- from molecules inside a cell all the way up to entire ecosystems",
+      "The study of atoms and their interactions with each other"
+    ],
+    ans: 2,
+    explain: "Biology literally means the study of life. It covers everything from tiny molecules to massive ecosystems -- if it is alive or was ever alive, biology is interested in it."
+  },
+  {
+    q: "Which level of biological organization is the smallest unit considered to be 'alive'?",
+    opts: [
+      "Atom",
+      "Molecule",
+      "Cell",
+      "Tissue"
+    ],
+    ans: 2,
+    explain: "Atoms and molecules are just chemistry -- they are not alive. The cell is the first level that can actually carry out all the processes of life on its own."
+  },
+  {
+    q: "What is the correct order of biological organization from smallest to largest?",
+    opts: [
+      "Cell → Atom → Molecule → Tissue → Organ",
+      "Atom → Molecule → Cell → Tissue → Organ → Organ System → Organism",
+      "Molecule → Cell → Organ → Tissue → Organism",
+      "Atom → Cell → Tissue → Molecule → Organ"
+    ],
+    ans: 1,
+    explain: "Atoms bond into molecules, molecules make up cells, cells form tissues, tissues make organs, organs work together in organ systems, and organ systems make up an organism."
+  },
+  {
+    q: "Which level of organization includes all DIFFERENT species living together in the same area?",
+    opts: [
+      "Population",
+      "Ecosystem",
+      "Community",
+      "Biosphere"
+    ],
+    ans: 2,
+    explain: "A community = multiple different species sharing the same space. A population = one species only. An ecosystem adds the nonliving environment. The biosphere is everything combined."
+  },
+  {
+    q: "What is a hypothesis in science?",
+    opts: [
+      "A proven fact accepted by the entire scientific community",
+      "A big-picture explanation backed by massive amounts of evidence from many experiments",
+      "A testable, if/then explanation for a specific observation -- not yet confirmed",
+      "A set of random observations with no proposed explanation"
+    ],
+    ans: 2,
+    explain: "A hypothesis is your educated, testable explanation for ONE specific observation. It has not been confirmed yet -- that is what the experiment is for."
+  },
+  {
+    q: "In an experiment, the independent variable is:",
+    opts: [
+      "The variable that you measure as the result",
+      "The variable that you hold constant throughout the experiment",
+      "The variable that you deliberately change or manipulate",
+      "The variable that produces unexpected or unpredictable results"
+    ],
+    ans: 2,
+    explain: "The independent variable is the one YOU control and change on purpose. In a plant-light experiment: you change the light exposure. Height is what you measure -- that is the dependent variable."
+  },
+  {
+    q: "What is the dependent variable in an experiment?",
+    opts: [
+      "The variable you change or manipulate",
+      "The variable you keep constant",
+      "The hypothesis being tested",
+      "The variable you measure to see the effect of the independent variable"
+    ],
+    ans: 3,
+    explain: "The dependent variable is what you MEASURE. Its value depends on what you did with the independent variable. Change light → measure height. Height depends on light."
+  },
+  {
+    q: "In science, a theory is best described as:",
+    opts: [
+      "A guess that has not been tested yet",
+      "A single observation from one scientist",
+      "A well-supported explanation backed by extensive evidence from many experiments and scientists",
+      "The same thing as a hypothesis"
+    ],
+    ans: 2,
+    explain: "A scientific theory is NOT a guess. It has been tested over and over, by many scientists, with the evidence all pointing the same way. Evolution and gravity are both theories."
+  },
+  {
+    q: "Which of the following is NOT one of the key points of natural selection?",
+    opts: [
+      "Variation exists among individuals in a population",
+      "Some traits are heritable and passed to offspring",
+      "All offspring survive equally regardless of their traits",
+      "Individuals with favorable traits survive and reproduce more"
+    ],
+    ans: 2,
+    explain: "Natural selection DEPENDS on unequal survival. More offspring are produced than can survive, and those with better traits for the environment are the ones that make it and pass on their genes."
+  },
+  {
+    q: "In the peppered moth example, why did the dark moth population grow after industrialization?",
+    opts: [
+      "Dark moths deliberately evolved a new color pattern to survive",
+      "Light moths migrated to other regions on purpose",
+      "Factory soot darkened the tree bark, making dark moths harder for predators to spot",
+      "Dark moths ran faster from predators than light moths"
+    ],
+    ans: 2,
+    explain: "The environment changed -- soot turned light tree bark dark. Dark moths now had better camouflage, survived more, reproduced more, and passed on that coloring. That is natural selection."
+  },
+  {
+    q: "Which of the following is NOT a property of life?",
+    opts: [
+      "Made of cells",
+      "Reproduces",
+      "Composed of metal",
+      "Responds to the environment"
+    ],
+    ans: 2,
+    explain: "The 8 properties of life: made of cells, uses energy (metabolism), responds to environment, maintains homeostasis, grows and develops, reproduces, has DNA, and populations evolve. Metal is not on the list."
+  },
+  {
+    q: "How many properties of life are there?",
+    opts: [
+      "4",
+      "6",
+      "8",
+      "10"
+    ],
+    ans: 2,
+    explain: "There are 8 properties: cellular organization, metabolism, response to stimuli, homeostasis, growth and development, reproduction, heredity (DNA), and evolution. All 8 must be present to be considered alive."
+  },
+  {
+    q: "Which of the three domains contains humans?",
+    opts: [
+      "Bacteria",
+      "Archaea",
+      "Eukarya",
+      "Protista"
+    ],
+    ans: 2,
+    explain: "Humans are eukaryotes -- we have a nucleus. Domain Eukarya contains all organisms with a true, membrane-bound nucleus. Bacteria and Archaea are both prokaryotes with no nucleus."
+  },
+  {
+    q: "What organisms are found in the domain Archaea?",
+    opts: [
+      "Common disease-causing germs like E. coli",
+      "Microscopic organisms that often live in extreme environments like hot springs and volcanic vents",
+      "Plants, animals, and fungi",
+      "All multicellular organisms on Earth"
+    ],
+    ans: 1,
+    explain: "Archaea look like bacteria under a microscope but are genetically very different. Many thrive in extreme environments -- boiling hot springs, extremely salty lakes, highly acidic pools."
+  },
+  {
+    q: "Which of the following is a kingdom within the domain Eukarya?",
+    opts: [
+      "Bacteria",
+      "Archaea",
+      "Fungi",
+      "Virus"
+    ],
+    ans: 2,
+    explain: "Domain Eukarya is split into four kingdoms: Animals, Plants, Fungi, and Protists. Bacteria and Archaea are entirely separate domains. Viruses are not in any domain -- they are not considered alive."
+  },
+  {
+    q: "What is the main structural difference between prokaryotic and eukaryotic cells?",
+    opts: [
+      "Prokaryotes are larger and more complex than eukaryotes",
+      "Prokaryotes have a membrane-bound nucleus; eukaryotes do not",
+      "Eukaryotes have a membrane-bound nucleus; prokaryotes have DNA floating free in the cytoplasm",
+      "Only prokaryotes have ribosomes"
+    ],
+    ans: 2,
+    explain: "Eukaryotes have a TRUE nucleus -- a membrane-bound room that holds their DNA. Prokaryotes have no such compartment; their DNA just floats loose in the cytoplasm. Both types have ribosomes."
+  },
+  {
+    q: "Which of the following is an example of a prokaryote?",
+    opts: [
+      "Human skin cell",
+      "Plant leaf cell",
+      "Bacterium",
+      "Fungal spore"
+    ],
+    ans: 2,
+    explain: "Bacteria are prokaryotes -- no nucleus, smaller, simpler structure. Human cells, plant cells, and fungal cells are all eukaryotes with a true membrane-bound nucleus."
+  },
+  {
+    q: "A population in biology refers to:",
+    opts: [
+      "All different species living in the same area",
+      "All individuals of the same species living in the same area",
+      "The community plus all nonliving environmental components",
+      "A single organism composed of many cells"
+    ],
+    ans: 1,
+    explain: "Population = one species, same area. Community = multiple species together. Ecosystem = community + nonliving factors. Do not mix these up -- they are commonly tested."
+  },
+  {
+    q: "An ecosystem includes:",
+    opts: [
+      "Only the living organisms in a specific area",
+      "Only all individuals of the same species",
+      "A community of species plus all the nonliving components like water, soil, and sunlight",
+      "Only the plants and large animals in a given region"
+    ],
+    ans: 2,
+    explain: "Ecosystem = community (all the living things) + all the nonliving (abiotic) factors like water, soil, temperature, and sunlight. It is the living world plus its physical setting."
+  },
+  {
+    q: "What are the four unifying themes that connect all of biology?",
+    opts: [
+      "Evolution, chemistry, physics, mathematics",
+      "Cell theory, gene theory, evolution, homeostasis",
+      "Natural selection, mutation, migration, genetic drift",
+      "Molecules, cells, organisms, ecosystems"
+    ],
+    ans: 1,
+    explain: "The four unifying themes: cell theory (all life is made of cells), gene theory (DNA stores hereditary info), evolution (species change over time), homeostasis (maintaining internal balance)."
+  },
+  {
+    q: "The biosphere is best defined as:",
+    opts: [
+      "All the cells on Earth combined",
+      "All organisms of a single dominant species",
+      "All ecosystems on Earth -- the sum total of all life and its environments",
+      "All of the liquid water on Earth"
+    ],
+    ans: 2,
+    explain: "The biosphere is the largest level -- it includes EVERYTHING alive on Earth plus all the environments they live in. Every ecosystem on every continent and in every ocean is part of it."
+  },
+  {
+    q: "A scientist notices fish are dying in a lake near a farm. What should be the scientist's NEXT step in the scientific method?",
+    opts: [
+      "Immediately publish the results",
+      "Repeat the observation many more times without any explanation",
+      "Form a hypothesis -- a testable explanation for why the fish are dying",
+      "Draw a final conclusion about the cause of the fish deaths"
+    ],
+    ans: 2,
+    explain: "Scientific method order: observe → form hypothesis → design experiment → draw conclusion. After observation, you need a testable explanation (hypothesis) before you can design any test."
+  }
+];
+
+let answered = 0;
+let correct = 0;
+let missed = [];
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function buildQuiz() {
+  const wrap = document.getElementById('quizWrap');
+  wrap.innerHTML = '';
+  answered = 0; correct = 0; missed = [];
+  updateProgress();
+
+  const shuffled = shuffle(questions);
+
+  shuffled.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${i}`;
+
+    const letters = ['A', 'B', 'C', 'D'];
+
+    card.innerHTML = `
+      <div class="q-number">Question ${i + 1} of ${shuffled.length}</div>
+      <div class="q-text">${item.q}</div>
+      <div class="options" id="opts-${i}">
+        ${item.opts.map((opt, oi) => `
+          <button class="option-btn" onclick="select(${i}, ${oi}, ${item.ans}, this, '${escStr(item.explain)}')" data-q="${i}">
+            <span class="opt-letter">${letters[oi]}</span>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback" id="fb-${i}"></div>
+    `;
+
+    card._item = item;
+    wrap.appendChild(card);
+  });
+
+  window._shuffled = shuffled;
+}
+
+function escStr(s) {
+  return s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function select(qIdx, chosen, correct_idx, btn, explain) {
+  const opts = document.querySelectorAll(`[data-q="${qIdx}"]`);
+  opts.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById(`fb-${qIdx}`);
+  const card = document.getElementById(`card-${qIdx}`);
+  card.classList.add('answered');
+
+  answered++;
+
+  if (chosen === correct_idx) {
+    btn.classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = `✓ Correct! ${explain}`;
+    correct++;
+  } else {
+    btn.classList.add('wrong');
+    opts[correct_idx].classList.add('correct');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `✗ Not quite. ${explain}`;
+    missed.push({ q: window._shuffled[qIdx].q, a: window._shuffled[qIdx].opts[correct_idx] });
+  }
+
+  updateProgress();
+
+  if (answered === questions.length) {
+    setTimeout(showResults, 600);
+  }
+}
+
+function updateProgress() {
+  const bar = document.getElementById('progressBar');
+  const label = document.getElementById('scoreDisplay');
+  const pct = questions.length > 0 ? (answered / questions.length) * 100 : 0;
+  bar.style.width = pct + '%';
+  label.textContent = `${answered} / ${questions.length} answered  •  ${correct} correct`;
+}
+
+function showResults() {
+  document.getElementById('quizWrap').style.display = 'none';
+  const results = document.getElementById('results');
+  results.classList.add('show');
+
+  const pct = Math.round((correct / questions.length) * 100);
+  let scoreClass = pct >= 80 ? 'great' : pct >= 60 ? 'ok' : 'bad';
+  let msg = pct >= 80 ? "You know this stuff." : pct >= 60 ? "Getting there. Review the misses." : "Go back through the study guide.";
+
+  let missedHTML = '';
+  if (missed.length > 0) {
+    missedHTML = `
+      <div class="missed-list">
+        <h3>Review These</h3>
+        ${missed.map(m => `
+          <div class="missed-item">
+            ${m.q}<br>
+            <span>→ ${m.a}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  results.innerHTML = `
+    <div class="result-label">Final Score</div>
+    <div class="result-score ${scoreClass}">${pct}%</div>
+    <div class="result-msg">${msg}</div>
+    <div style="color:var(--muted); font-size:13px; margin-bottom: 8px;">${correct} correct out of ${questions.length}</div>
+    ${missedHTML}
+    <button class="retry-btn" onclick="retry()">Try Again</button>
+  `;
+}
+
+function retry() {
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('quizWrap').style.display = '';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

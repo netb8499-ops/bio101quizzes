@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio 101 — Chapter 3 Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #2a2a3a;
+    --accent: #00e5a0;
+    --accent2: #ff4d6d;
+    --accent3: #7b61ff;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --correct: #00e5a0;
+    --wrong: #ff4d6d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background-image: radial-gradient(ellipse at 20% 0%, rgba(123,97,255,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, rgba(0,229,160,0.06) 0%, transparent 60%);
+  }
+
+  header { text-align: center; margin-bottom: 48px; }
+
+  header .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--text);
+  }
+
+  header h1 span { color: var(--accent); }
+
+  .progress-bar-wrap {
+    max-width: 680px;
+    margin: 24px auto 0;
+    background: var(--border);
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .score-display {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  .restart-btn {
+    display: inline-block;
+    margin-top: 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .restart-btn:hover {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    background: rgba(255,77,109,0.06);
+  }
+
+  .quiz-wrap { max-width: 680px; margin: 0 auto; }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    transition: border-color 0.3s;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .question-card.answered::before { opacity: 1; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .q-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .options { display: grid; gap: 10px; }
+
+  .option-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1.4;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent3);
+    background: rgba(123,97,255,0.08);
+    transform: translateX(4px);
+  }
+
+  .option-btn .opt-letter {
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 18px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+
+  .option-btn:hover:not(:disabled) .opt-letter { color: var(--accent3); }
+
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(0,229,160,0.08);
+    color: var(--correct);
+  }
+
+  .option-btn.correct .opt-letter { color: var(--correct); }
+
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,77,109,0.08);
+    color: var(--wrong);
+  }
+
+  .option-btn.wrong .opt-letter { color: var(--wrong); }
+  .option-btn:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    display: none;
+  }
+
+  .feedback.correct {
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.3);
+    color: var(--correct);
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.3);
+    color: #ff8fa3;
+    display: block;
+  }
+
+  #results {
+    display: none;
+    text-align: center;
+    padding: 60px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  #results.show { display: block; animation: slideIn 0.4s ease; }
+
+  .result-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -4px;
+    margin: 16px 0;
+  }
+
+  .result-score.great { color: var(--correct); }
+  .result-score.ok { color: #ffd166; }
+  .result-score.bad { color: var(--wrong); }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .result-msg {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: var(--text);
+  }
+
+  .retry-btn {
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 16px 40px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .retry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,229,160,0.25);
+  }
+
+  .missed-list {
+    text-align: left;
+    margin: 32px 0;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+
+  .missed-list h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wrong);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .missed-item {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+  }
+
+  .missed-item span { color: var(--correct); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">BI101 // Chapter 3</div>
+  <h1>Biological <span>Macromolecules</span></h1>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="score-display" id="scoreDisplay">0 / 0 answered</div>
+  <button class="restart-btn" onclick="retry()">&#8635; Restart &amp; Shuffle</button>
+</header>
+
+<div class="quiz-wrap" id="quizWrap"></div>
+<div id="results"></div>
+
+<script>
+const questions = [
+  {
+    q: "What makes a compound 'organic'?",
+    opts: [
+      "It was grown without pesticides or synthetic chemicals",
+      "It contains carbon-hydrogen bonds",
+      "It comes from living soil or compost",
+      "It contains only oxygen and hydrogen"
+    ],
+    ans: 1,
+    explain: "Organic compounds are carbon-based and almost always contain C-H bonds. Examples: glucose, methane, proteins. Inorganic compounds generally lack C-H bonds -- like water, table salt, CO2."
+  },
+  {
+    q: "Why is carbon so important for building biological molecules?",
+    opts: [
+      "It has 8 electrons in its outer shell, making it already fully stable",
+      "It has 4 valence electrons, allowing it to form 4 covalent bonds and build complex molecules",
+      "It is the lightest element on the periodic table",
+      "It only bonds with hydrogen, keeping molecules simple"
+    ],
+    ans: 1,
+    explain: "Carbon has 4 valence electrons and needs 4 more to fill its shell. This lets it form 4 covalent bonds simultaneously -- like a Lego brick. That is why it can build endless chains, rings, and branched structures."
+  },
+  {
+    q: "A monomer is to a polymer as a ________ is to a ________.",
+    opts: [
+      "House / brick",
+      "Chain / link",
+      "Brick / house",
+      "Tree / forest"
+    ],
+    ans: 2,
+    explain: "A monomer is a single building block. A polymer is the large molecule built by chaining many monomers together. Single brick = monomer. Castle made of bricks = polymer."
+  },
+  {
+    q: "What reaction builds polymers from monomers?",
+    opts: [
+      "Hydrolysis -- splits water and adds it to break bonds",
+      "Oxidation -- removes electrons from molecules",
+      "Dehydration synthesis -- releases a water molecule as monomers join",
+      "Reduction -- adds electrons to form new bonds"
+    ],
+    ans: 2,
+    explain: "Dehydration synthesis = building by removing water. One monomer loses an H, the other loses an OH group, those combine to form water (H2O), and the two monomers are now bonded together."
+  },
+  {
+    q: "What reaction breaks polymers into individual monomers?",
+    opts: [
+      "Dehydration synthesis",
+      "Hydrolysis",
+      "Combustion",
+      "Polymerization"
+    ],
+    ans: 1,
+    explain: "Hydrolysis = breaking with water. A water molecule is split (H and OH) and those pieces cap the broken ends of the bond. Hydro = water, lysis = to break."
+  },
+  {
+    q: "Which of the following is NOT one of the four major biological macromolecules?",
+    opts: [
+      "Carbohydrates",
+      "Lipids",
+      "Vitamins",
+      "Proteins"
+    ],
+    ans: 2,
+    explain: "The four macromolecules: carbohydrates, lipids, proteins, and nucleic acids. Vitamins are important but they are not one of the four major groups of biological macromolecules."
+  },
+  {
+    q: "What is a monosaccharide?",
+    opts: [
+      "A long chain of hundreds of sugar rings",
+      "Two sugar rings joined together by a covalent bond",
+      "A single sugar ring that provides immediate fast energy for cells",
+      "A type of amino acid found in muscle tissue"
+    ],
+    ans: 2,
+    explain: "Monosaccharide = one sugar ring. These are the monomers of carbohydrates. Examples: glucose, fructose, galactose, ribose. They provide immediate, fast-access energy."
+  },
+  {
+    q: "Which of the following is a disaccharide?",
+    opts: [
+      "Glucose",
+      "Fructose",
+      "Sucrose",
+      "Starch"
+    ],
+    ans: 2,
+    explain: "Sucrose (table sugar) = glucose + fructose joined together. Disaccharide = two sugars. Other disaccharides: lactose (milk sugar) and maltose. Starch is a polysaccharide -- hundreds of sugars."
+  },
+  {
+    q: "Give four examples of monosaccharides.",
+    opts: [
+      "Sucrose, lactose, maltose, starch",
+      "Cellulose, glycogen, starch, chitin",
+      "Glucose, fructose, galactose, ribose",
+      "Amino acids, fatty acids, nucleotides, glycerol"
+    ],
+    ans: 2,
+    explain: "The four monosaccharides you need to know: glucose (energy currency), fructose (fruit sugar), galactose (part of lactose), and ribose (part of RNA/ATP). All are single sugar rings."
+  },
+  {
+    q: "What is the function of glycogen in animals?",
+    opts: [
+      "Structural support in cell walls and connective tissue",
+      "Short-term energy storage in a branched polysaccharide form -- mainly in liver and muscle",
+      "Acts as an identification tag on the outside of cell membranes",
+      "Stores genetic information in the nucleus"
+    ],
+    ans: 1,
+    explain: "Glycogen is the animal version of starch -- a branched polysaccharide for energy storage. Your liver and muscles store glycogen. When you need energy fast, they break it down."
+  },
+  {
+    q: "Why is cellulose so tough and rigid while starch can be broken down for energy?",
+    opts: [
+      "Cellulose contains more glucose rings than starch",
+      "Starch is made of fructose while cellulose is made of glucose",
+      "Cellulose has straight unbranched chains that pack tightly; starch is branched and easy for enzymes to break down",
+      "Cellulose is a protein while starch is a carbohydrate"
+    ],
+    ans: 2,
+    explain: "Both are glucose polysaccharides, but the glucose rings are linked differently. Cellulose chains are straight and pack tightly into strong fibers -- humans cannot digest it. Starch is coiled and branched -- easy to break down."
+  },
+  {
+    q: "What part of an amino acid determines its unique chemical properties?",
+    opts: [
+      "The amino group",
+      "The carboxyl group",
+      "The central carbon",
+      "The R group (side chain)"
+    ],
+    ans: 3,
+    explain: "Every amino acid has the same backbone (central carbon, amino group, carboxyl group). The R group is the variable piece -- it is what makes each of the 20 amino acids different and determines how the protein folds."
+  },
+  {
+    q: "What type of bond links amino acids together to form a polypeptide chain?",
+    opts: [
+      "Ionic bond",
+      "Hydrogen bond",
+      "Peptide bond",
+      "Phosphodiester bond"
+    ],
+    ans: 2,
+    explain: "Peptide bonds are covalent bonds formed by dehydration synthesis -- the amino group of one amino acid bonds to the carboxyl group of the next, releasing water. This links amino acids into a chain."
+  },
+  {
+    q: "Which level of protein structure is simply the linear sequence of amino acids?",
+    opts: [
+      "Primary",
+      "Secondary",
+      "Tertiary",
+      "Quaternary"
+    ],
+    ans: 0,
+    explain: "Primary structure = the sequence of amino acids in the chain, held together by peptide bonds. Think of it as the text string of letters. This sequence determines everything else about the protein."
+  },
+  {
+    q: "What holds secondary protein structures (alpha helices and beta-pleated sheets) together?",
+    opts: [
+      "Covalent peptide bonds",
+      "Ionic bonds between charged R groups",
+      "Hydrogen bonds between atoms in the polypeptide backbone",
+      "Disulfide bridges between cysteine residues"
+    ],
+    ans: 2,
+    explain: "Secondary structure = coils and folds in the backbone. Hydrogen bonds between the backbone NH and C=O groups hold these shapes (alpha helices and beta sheets) stable."
+  },
+  {
+    q: "What is tertiary protein structure?",
+    opts: [
+      "The sequence of amino acids in the polypeptide",
+      "The overall 3D shape of a single complete polypeptide chain",
+      "The arrangement of alpha helices only, not including other folds",
+      "The structure formed when multiple polypeptide chains combine"
+    ],
+    ans: 1,
+    explain: "Tertiary = the full 3D shape of ONE polypeptide. Held by hydrogen bonds, ionic bonds, disulfide bridges, and hydrophobic R group interactions. This 3D shape is what determines the protein's function."
+  },
+  {
+    q: "What is quaternary protein structure?",
+    opts: [
+      "The sequence of amino acids in a single chain",
+      "The coils and folds of the polypeptide backbone",
+      "The 3D shape of a single polypeptide chain",
+      "The structure formed when two or more polypeptide chains come together"
+    ],
+    ans: 3,
+    explain: "Quaternary = multiple polypeptide chains working together as one protein complex. Hemoglobin is a classic example -- it has four polypeptide subunits assembled into one functional protein."
+  },
+  {
+    q: "What is protein denaturation?",
+    opts: [
+      "When a protein gains new amino acids and becomes larger",
+      "When a protein loses its 3D shape and can no longer function",
+      "When a protein becomes more active at higher temperatures",
+      "When a protein forms new peptide bonds with other proteins"
+    ],
+    ans: 1,
+    explain: "Denaturation = loss of shape = loss of function. The bonds holding the 3D structure break, the protein unfolds, and it cannot do its job. Frying an egg is denaturation -- the proteins unfold and cannot refold."
+  },
+  {
+    q: "Which condition can cause a protein to denature?",
+    opts: [
+      "Neutral pH and room temperature",
+      "High temperature -- heat breaks the weak bonds holding the 3D shape",
+      "Low salt concentration in water",
+      "Being dissolved in liquid water at body temperature"
+    ],
+    ans: 1,
+    explain: "High heat breaks hydrogen bonds and other weak interactions that hold the 3D shape. Extreme pH (acid or base) also denatures proteins by disrupting ionic bonds. These are the most common denaturing conditions."
+  },
+  {
+    q: "What makes a fat 'saturated'?",
+    opts: [
+      "It contains double bonds between carbons and bends in the chain",
+      "It only contains single bonds between carbons, with every carbon holding max hydrogen",
+      "It dissolves easily in water",
+      "It is liquid at room temperature"
+    ],
+    ans: 1,
+    explain: "Saturated = saturated WITH hydrogen. Only single C-C bonds, so every carbon holds as many hydrogens as possible. The chains are straight and can pack tightly together -- making the fat solid at room temperature (like butter)."
+  },
+  {
+    q: "Unsaturated fats are liquid at room temperature because:",
+    opts: [
+      "They contain no hydrogen atoms at all",
+      "Double bonds create kinks in the chain that prevent tight packing",
+      "They have more carbon atoms than saturated fats",
+      "They are made of glycerol only with no fatty acid tails"
+    ],
+    ans: 1,
+    explain: "Unsaturated fats have one or more C=C double bonds, which create kinks or bends in the chain. These kinks prevent the molecules from packing tightly, so they stay liquid at room temperature -- like vegetable oil."
+  },
+  {
+    q: "What makes phospholipids form a bilayer in cell membranes?",
+    opts: [
+      "They are too large to exist as single molecules in solution",
+      "They have both a hydrophilic phosphate head and two hydrophobic fatty acid tails (amphipathic)",
+      "They are strongly attracted to the proteins embedded in the membrane",
+      "They completely repel water on both ends of the molecule"
+    ],
+    ans: 1,
+    explain: "Phospholipids are amphipathic -- they have a water-loving head and water-fearing tails. In water, they arrange into a bilayer so heads face the water on both sides and tails hide in the middle away from water."
+  },
+  {
+    q: "What are the three components of a nucleotide?",
+    opts: [
+      "Amino acid, phosphate group, sugar",
+      "Phosphate group, pentose sugar, nitrogenous base",
+      "Fatty acid, glycerol, phosphate group",
+      "Sugar, nitrogenous base, protein"
+    ],
+    ans: 1,
+    explain: "Every nucleotide = phosphate group + pentose sugar (ribose in RNA, deoxyribose in DNA) + nitrogenous base (A, T, G, C, or U). These three pieces snap together to form the monomer of DNA and RNA."
+  },
+  {
+    q: "What is ATP and what does it do?",
+    opts: [
+      "A type of DNA that stores long-term genetic information",
+      "A structural protein found in muscle fibers",
+      "The cell's primary energy currency -- stores and delivers quick usable energy for cellular work",
+      "A lipid that forms the outer layer of cell membranes"
+    ],
+    ans: 2,
+    explain: "ATP = Adenosine Triphosphate. It is the universal energy currency of the cell. When the bond to the third phosphate group breaks (ATP becomes ADP), energy is released and used for cellular work."
+  },
+  {
+    q: "What is the structural difference between DNA and RNA sugar?",
+    opts: [
+      "DNA has uracil as a base; RNA has thymine as a base",
+      "DNA is single-stranded; RNA is double-stranded",
+      "DNA uses deoxyribose sugar (missing one oxygen); RNA uses ribose sugar",
+      "DNA uses ribose sugar; RNA uses deoxyribose sugar"
+    ],
+    ans: 2,
+    explain: "DNA = deoxyribose (the prefix deoxy means missing an oxygen). RNA = ribose. That one missing oxygen makes the DNA strand more chemically stable -- which is why DNA is used for long-term storage of genetic info."
+  }
+];
+
+let answered = 0;
+let correct = 0;
+let missed = [];
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function buildQuiz() {
+  const wrap = document.getElementById('quizWrap');
+  wrap.innerHTML = '';
+  answered = 0; correct = 0; missed = [];
+  updateProgress();
+
+  const shuffled = shuffle(questions);
+
+  shuffled.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${i}`;
+
+    const letters = ['A', 'B', 'C', 'D'];
+
+    card.innerHTML = `
+      <div class="q-number">Question ${i + 1} of ${shuffled.length}</div>
+      <div class="q-text">${item.q}</div>
+      <div class="options" id="opts-${i}">
+        ${item.opts.map((opt, oi) => `
+          <button class="option-btn" onclick="select(${i}, ${oi}, ${item.ans}, this, '${escStr(item.explain)}')" data-q="${i}">
+            <span class="opt-letter">${letters[oi]}</span>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback" id="fb-${i}"></div>
+    `;
+
+    card._item = item;
+    wrap.appendChild(card);
+  });
+
+  window._shuffled = shuffled;
+}
+
+function escStr(s) {
+  return s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function select(qIdx, chosen, correct_idx, btn, explain) {
+  const opts = document.querySelectorAll(`[data-q="${qIdx}"]`);
+  opts.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById(`fb-${qIdx}`);
+  const card = document.getElementById(`card-${qIdx}`);
+  card.classList.add('answered');
+
+  answered++;
+
+  if (chosen === correct_idx) {
+    btn.classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = `✓ Correct! ${explain}`;
+    correct++;
+  } else {
+    btn.classList.add('wrong');
+    opts[correct_idx].classList.add('correct');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `✗ Not quite. ${explain}`;
+    missed.push({ q: window._shuffled[qIdx].q, a: window._shuffled[qIdx].opts[correct_idx] });
+  }
+
+  updateProgress();
+
+  if (answered === questions.length) {
+    setTimeout(showResults, 600);
+  }
+}
+
+function updateProgress() {
+  const bar = document.getElementById('progressBar');
+  const label = document.getElementById('scoreDisplay');
+  const pct = questions.length > 0 ? (answered / questions.length) * 100 : 0;
+  bar.style.width = pct + '%';
+  label.textContent = `${answered} / ${questions.length} answered  •  ${correct} correct`;
+}
+
+function showResults() {
+  document.getElementById('quizWrap').style.display = 'none';
+  const results = document.getElementById('results');
+  results.classList.add('show');
+
+  const pct = Math.round((correct / questions.length) * 100);
+  let scoreClass = pct >= 80 ? 'great' : pct >= 60 ? 'ok' : 'bad';
+  let msg = pct >= 80 ? "You know this stuff." : pct >= 60 ? "Getting there. Review the misses." : "Go back through the study guide.";
+
+  let missedHTML = '';
+  if (missed.length > 0) {
+    missedHTML = `
+      <div class="missed-list">
+        <h3>Review These</h3>
+        ${missed.map(m => `
+          <div class="missed-item">
+            ${m.q}<br>
+            <span>→ ${m.a}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  results.innerHTML = `
+    <div class="result-label">Final Score</div>
+    <div class="result-score ${scoreClass}">${pct}%</div>
+    <div class="result-msg">${msg}</div>
+    <div style="color:var(--muted); font-size:13px; margin-bottom: 8px;">${correct} correct out of ${questions.length}</div>
+    ${missedHTML}
+    <button class="retry-btn" onclick="retry()">Try Again</button>
+  `;
+}
+
+function retry() {
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('quizWrap').style.display = '';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

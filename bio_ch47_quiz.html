@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio 101 — Chapter 47 Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #2a2a3a;
+    --accent: #00e5a0;
+    --accent2: #ff4d6d;
+    --accent3: #7b61ff;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --correct: #00e5a0;
+    --wrong: #ff4d6d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background-image: radial-gradient(ellipse at 20% 0%, rgba(123,97,255,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, rgba(0,229,160,0.06) 0%, transparent 60%);
+  }
+
+  header { text-align: center; margin-bottom: 48px; }
+
+  header .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--text);
+  }
+
+  header h1 span { color: var(--accent); }
+
+  .progress-bar-wrap {
+    max-width: 680px;
+    margin: 24px auto 0;
+    background: var(--border);
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .score-display {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  .restart-btn {
+    display: inline-block;
+    margin-top: 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .restart-btn:hover {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    background: rgba(255,77,109,0.06);
+  }
+
+  .quiz-wrap { max-width: 680px; margin: 0 auto; }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    transition: border-color 0.3s;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .question-card.answered::before { opacity: 1; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .q-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .options { display: grid; gap: 10px; }
+
+  .option-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1.4;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent3);
+    background: rgba(123,97,255,0.08);
+    transform: translateX(4px);
+  }
+
+  .option-btn .opt-letter {
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 18px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+
+  .option-btn:hover:not(:disabled) .opt-letter { color: var(--accent3); }
+
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(0,229,160,0.08);
+    color: var(--correct);
+  }
+
+  .option-btn.correct .opt-letter { color: var(--correct); }
+
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,77,109,0.08);
+    color: var(--wrong);
+  }
+
+  .option-btn.wrong .opt-letter { color: var(--wrong); }
+  .option-btn:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    display: none;
+  }
+
+  .feedback.correct {
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.3);
+    color: var(--correct);
+    display: block;
+  }
+
+  .feedback.wrong {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.3);
+    color: #ff8fa3;
+    display: block;
+  }
+
+  #results {
+    display: none;
+    text-align: center;
+    padding: 60px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  #results.show { display: block; animation: slideIn 0.4s ease; }
+
+  .result-score {
+    font-family: 'Syne', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -4px;
+    margin: 16px 0;
+  }
+
+  .result-score.great { color: var(--correct); }
+  .result-score.ok { color: #ffd166; }
+  .result-score.bad { color: var(--wrong); }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .result-msg {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: var(--text);
+  }
+
+  .retry-btn {
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 16px 40px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .retry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,229,160,0.25);
+  }
+
+  .missed-list {
+    text-align: left;
+    margin: 32px 0;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+
+  .missed-list h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wrong);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .missed-item {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+  }
+
+  .missed-item span { color: var(--correct); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">BI101 // Chapter 47</div>
+  <h1>Conservation <span>Biology</span></h1>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="score-display" id="scoreDisplay">0 / 0 answered</div>
+  <button class="restart-btn" onclick="retry()">&#8635; Restart &amp; Shuffle</button>
+</header>
+
+<div class="quiz-wrap" id="quizWrap"></div>
+<div id="results"></div>
+
+<script>
+const questions = [
+  {
+    q: "What is the #1 cause of biodiversity loss worldwide?",
+    opts: [
+      "Overexploitation through overhunting and overfishing",
+      "Climate change shifting global temperatures",
+      "Habitat loss and fragmentation",
+      "Pollution from chemicals and fertilizers"
+    ],
+    ans: 2,
+    explain: "Habitat loss is #1 by a large margin. When you destroy or fragment a habitat, every species that depended on it loses its home. All other threats combined do not come close to the scale of habitat destruction."
+  },
+  {
+    q: "What is the Tragedy of the Commons?",
+    opts: [
+      "A species going extinct due to one catastrophic natural event",
+      "The pattern where individuals overuse a shared resource for personal short-term gain, destroying it for everyone long-term",
+      "When too many species share the same habitat and outcompete each other",
+      "When invasive species completely eliminate native wildlife from a shared ecosystem"
+    ],
+    ans: 1,
+    explain: "Classic example: everyone grazes their cattle on shared land. Each individual benefits by adding one more cow, but the collective overgrazing destroys the land for everyone. Overfishing works the same way -- rational individual choices lead to collective ruin."
+  },
+  {
+    q: "What is an invasive species?",
+    opts: [
+      "Any species that naturally expands its range into new territory",
+      "A native species that becomes unusually dominant in its ecosystem",
+      "A non-native species introduced by humans that spreads aggressively and causes ecological or economic harm",
+      "A species that preys on endangered animals"
+    ],
+    ans: 2,
+    explain: "Invasive species are exotic (non-native) species that do not just survive -- they take over. They often have no natural predators in the new environment, so their populations explode and outcompete native species."
+  },
+  {
+    q: "What is the difference between an exotic species and an invasive species?",
+    opts: [
+      "They are identical terms used interchangeably in biology",
+      "Exotic species are harmful; invasive species are beneficial to ecosystems",
+      "An exotic species is simply non-native; an invasive species is an exotic that spreads aggressively and causes harm",
+      "Invasive species are introduced intentionally; exotic species always arrive accidentally"
+    ],
+    ans: 2,
+    explain: "All invasive species are exotic, but not all exotic species are invasive. An exotic species is just one that was introduced from somewhere else. It only becomes invasive if it spreads rapidly and damages the ecosystem."
+  },
+  {
+    q: "What is an endemic species?",
+    opts: [
+      "A species found naturally on every continent",
+      "A species that recently went extinct within the last 100 years",
+      "A species found naturally only in one specific geographic area and nowhere else on Earth",
+      "A species that was introduced from another country by humans"
+    ],
+    ans: 2,
+    explain: "Endemic = found only HERE, nowhere else. The Galapagos giant tortoise is endemic to the Galapagos Islands. Hawaii has enormous endemism -- species that evolved there and exist only there. Losing their habitat = losing them forever."
+  },
+  {
+    q: "What is a biodiversity hotspot?",
+    opts: [
+      "A warm tropical area with unusually high ambient temperatures",
+      "An area with an exceptionally high number of unique (often endemic) species that faces immediate threat of destruction",
+      "Any ecosystem that contains more than 1,000 different species",
+      "A designated marine protected area managed by international treaty"
+    ],
+    ans: 1,
+    explain: "Biodiversity hotspots = high endemic species + high threat. These areas are conservation priorities because you can protect a large number of unique species by saving a relatively small area. Many hotspots are tropical."
+  },
+  {
+    q: "Which of these is a 'provisioning' ecosystem service?",
+    opts: [
+      "Flood control provided by wetlands",
+      "Crop pollination performed by wild bees",
+      "Soil formation and nutrient cycling",
+      "Clean water, food, timber, and medicines"
+    ],
+    ans: 3,
+    explain: "Provisioning services = things ecosystems PROVIDE that humans can directly use. Clean water, food, timber, medicines -- all physical goods that come from healthy ecosystems for free. Flood control is regulating. Soil formation is supporting."
+  },
+  {
+    q: "Which of these is a 'regulating' ecosystem service?",
+    opts: [
+      "Timber and raw materials provided by forests",
+      "Flood control by wetlands and crop pollination by wild bees",
+      "Soil formation through decomposition",
+      "Genetic diversity maintained in wild populations"
+    ],
+    ans: 1,
+    explain: "Regulating services = ecosystem processes that regulate our environment. Wetlands absorb floodwater. Bees pollinate crops. Forests filter air. These are services we get for free -- replace them artificially and the cost is enormous."
+  },
+  {
+    q: "What are 'supporting' ecosystem services?",
+    opts: [
+      "Government policies and funding that protect natural habitats",
+      "The basic foundational processes like soil formation and nutrient cycling that underpin all other ecosystem services",
+      "Non-profit conservation organizations that advocate for biodiversity",
+      "Tourism and recreation revenues generated by national parks"
+    ],
+    ans: 1,
+    explain: "Supporting services are the foundation. Soil formation, nutrient cycling, water cycling -- without these basics, there would be no provisioning or regulating services at all. They do not directly benefit humans but everything else depends on them."
+  },
+  {
+    q: "What is overexploitation?",
+    opts: [
+      "Using too many pesticides on agricultural land",
+      "Harvesting or hunting a species at a rate faster than it can reproduce",
+      "Introducing too many non-native species into an ecosystem at once",
+      "Burning too many fossil fuels in a single geographic region"
+    ],
+    ans: 1,
+    explain: "Overexploitation = taking more than the population can replace. Overfishing a stock until it collapses. Hunting species faster than they breed. Once a population crashes below a certain threshold, it often cannot recover even if harvesting stops."
+  },
+  {
+    q: "What is Earth's biocapacity?",
+    opts: [
+      "The total number of species the planet can theoretically support",
+      "The maximum human population Earth can sustain given current technology",
+      "The capacity of ecosystems to produce useful biological materials and absorb human-generated waste",
+      "The total land area on Earth available for agriculture and development"
+    ],
+    ans: 2,
+    explain: "Biocapacity = what Earth can regenerate and absorb. If humanity uses resources faster than Earth regenerates them and produces waste faster than ecosystems absorb it, we are in ecological overshoot -- spending down our planet."
+  },
+  {
+    q: "What are the three features of self-renewing communities?",
+    opts: [
+      "High-tech management, rapid growth, and fossil fuel energy inputs",
+      "Monocultures, high productivity per acre, and controlled environments",
+      "Reliance on solar energy, efficient nutrient recycling, and maintained biodiversity",
+      "Human oversight, genetic engineering, and chemical pest control"
+    ],
+    ans: 2,
+    explain: "Self-renewing communities run on solar energy (no external energy input needed), recycle all nutrients internally (zero waste), and maintain biodiversity (resilience buffer). These are the principles natural ecosystems have used for billions of years."
+  },
+  {
+    q: "How does climate change threaten biodiversity?",
+    opts: [
+      "It only affects species living in polar regions and at high elevations",
+      "It shifts temperatures and weather patterns too rapidly for most species to adapt or migrate fast enough",
+      "It directly poisons animal populations through increasingly acidic rainfall",
+      "It eliminates invasive species by making conditions unfavorable for non-native organisms"
+    ],
+    ans: 1,
+    explain: "Species can adapt or migrate -- but only if the change is slow enough. Climate change is happening on a timescale of decades, not the thousands of years species normally have to adapt. Many cannot keep up and face extinction."
+  },
+  {
+    q: "What is the extinction rate, and why is it alarming?",
+    opts: [
+      "The percentage of species that are currently classified as endangered",
+      "The number of new species discovered by scientists each year",
+      "The speed at which species are permanently disappearing from Earth -- currently estimated at 100 to 1,000 times the natural background rate",
+      "The rate at which habitats are being restored through conservation efforts"
+    ],
+    ans: 2,
+    explain: "Extinction rate = how fast species are disappearing. The background (natural) extinction rate is about 1 species per million per year. Current estimates suggest we are losing species at 100 to 1,000 times that rate -- a mass extinction event."
+  },
+  {
+    q: "Which of the following correctly lists ALL FIVE main threats to biodiversity?",
+    opts: [
+      "Climate change, habitat loss, pollution, overexploitation, invasive species",
+      "Habitat loss, disease, natural disasters, overexploitation, invasive species",
+      "Pollution, acid rain, hunting, human overpopulation, climate change",
+      "Deforestation, ocean acidification, ozone depletion, soil erosion, invasive species"
+    ],
+    ans: 0,
+    explain: "The five main threats: (1) Habitat loss -- #1 by far. (2) Overexploitation -- hunting and fishing species out. (3) Invasive species -- non-natives taking over. (4) Climate change -- too fast to adapt. (5) Pollution -- toxins poisoning ecosystems."
+  },
+  {
+    q: "Why does maintaining biodiversity make ecosystems more resilient?",
+    opts: [
+      "More species means more competition which actually reduces overall ecosystem stability",
+      "Biodiversity has no direct relationship to ecosystem function or stability",
+      "A diverse ecosystem has more redundancy -- if one species is lost, others can fill its role, keeping the system functioning",
+      "High biodiversity only improves resilience in tropical ecosystems, not in temperate ones"
+    ],
+    ans: 2,
+    explain: "Biodiversity = redundancy = resilience. If an ecosystem has 5 species that pollinate plants and one goes extinct, the other 4 can cover for it. A monoculture with one pollinator? Lose it and the whole system collapses. More species = more backup."
+  }
+];
+
+let answered = 0;
+let correct = 0;
+let missed = [];
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function buildQuiz() {
+  const wrap = document.getElementById('quizWrap');
+  wrap.innerHTML = '';
+  answered = 0; correct = 0; missed = [];
+  updateProgress();
+
+  const shuffled = shuffle(questions);
+
+  shuffled.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${i}`;
+
+    const letters = ['A', 'B', 'C', 'D'];
+
+    card.innerHTML = `
+      <div class="q-number">Question ${i + 1} of ${shuffled.length}</div>
+      <div class="q-text">${item.q}</div>
+      <div class="options" id="opts-${i}">
+        ${item.opts.map((opt, oi) => `
+          <button class="option-btn" onclick="select(${i}, ${oi}, ${item.ans}, this, '${escStr(item.explain)}')" data-q="${i}">
+            <span class="opt-letter">${letters[oi]}</span>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback" id="fb-${i}"></div>
+    `;
+
+    card._item = item;
+    wrap.appendChild(card);
+  });
+
+  window._shuffled = shuffled;
+}
+
+function escStr(s) {
+  return s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function select(qIdx, chosen, correct_idx, btn, explain) {
+  const opts = document.querySelectorAll(`[data-q="${qIdx}"]`);
+  opts.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById(`fb-${qIdx}`);
+  const card = document.getElementById(`card-${qIdx}`);
+  card.classList.add('answered');
+
+  answered++;
+
+  if (chosen === correct_idx) {
+    btn.classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = `✓ Correct! ${explain}`;
+    correct++;
+  } else {
+    btn.classList.add('wrong');
+    opts[correct_idx].classList.add('correct');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `✗ Not quite. ${explain}`;
+    missed.push({ q: window._shuffled[qIdx].q, a: window._shuffled[qIdx].opts[correct_idx] });
+  }
+
+  updateProgress();
+
+  if (answered === questions.length) {
+    setTimeout(showResults, 600);
+  }
+}
+
+function updateProgress() {
+  const bar = document.getElementById('progressBar');
+  const label = document.getElementById('scoreDisplay');
+  const pct = questions.length > 0 ? (answered / questions.length) * 100 : 0;
+  bar.style.width = pct + '%';
+  label.textContent = `${answered} / ${questions.length} answered  •  ${correct} correct`;
+}
+
+function showResults() {
+  document.getElementById('quizWrap').style.display = 'none';
+  const results = document.getElementById('results');
+  results.classList.add('show');
+
+  const pct = Math.round((correct / questions.length) * 100);
+  let scoreClass = pct >= 80 ? 'great' : pct >= 60 ? 'ok' : 'bad';
+  let msg = pct >= 80 ? "You know this stuff." : pct >= 60 ? "Getting there. Review the misses." : "Go back through the study guide.";
+
+  let missedHTML = '';
+  if (missed.length > 0) {
+    missedHTML = `
+      <div class="missed-list">
+        <h3>Review These</h3>
+        ${missed.map(m => `
+          <div class="missed-item">
+            ${m.q}<br>
+            <span>→ ${m.a}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  results.innerHTML = `
+    <div class="result-label">Final Score</div>
+    <div class="result-score ${scoreClass}">${pct}%</div>
+    <div class="result-msg">${msg}</div>
+    <div style="color:var(--muted); font-size:13px; margin-bottom: 8px;">${correct} correct out of ${questions.length}</div>
+    ${missedHTML}
+    <button class="retry-btn" onclick="retry()">Try Again</button>
+  `;
+}
+
+function retry() {
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('quizWrap').style.display = '';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
